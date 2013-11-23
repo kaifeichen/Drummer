@@ -30,14 +30,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.myfirstapp.MainActivity" />
         </activity>
-        <activity
-            android:name="com.example.firstapp.SendVoiceActivity"
-            android:label="@string/title_activity_send_voice" >
-        </activity>
-        <activity
-            android:name="com.example.firstapp.Activityhaha"
-            android:label="@string/title_activity_activityhaha" >
-        </activity>
     </application>
 
 </manifest>
+
