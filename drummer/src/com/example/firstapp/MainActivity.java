@@ -50,8 +50,8 @@ public class MainActivity extends Activity {
         Send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-            	t = new Thread() {
-                	@SuppressLint("NewApi") @Override     	  
+                t = new Thread() {
+                    @SuppressLint("NewApi") @Override         
                     public void run() {
 
                         setPriority(Thread.MAX_PRIORITY);
@@ -59,29 +59,42 @@ public class MainActivity extends Activity {
                         int buffsize = AudioTrack.getMinBufferSize(sr, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT);
 
                         AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, sr, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, buffsize, AudioTrack.MODE_STREAM);
-                        long S0;
+                        double S0;
                         if (Sendtime.getText().toString().isEmpty()){
-                        	S0=0;
+                            S0=0.0;
                         }
                         else{
-                        	S0= Long.parseLong(Sendtime.getText().toString());
+                            S0= Double.parseDouble(Sendtime.getText().toString())/1000.0;
                         }
                         
                         short samples[] = new short[buffsize];
                         int amp = 10000;
                         double twopi = 8.*Math.atan(1.);
-                        double fr = 2000.f;
                         double ph = 0.0;
+                        double fr =  2000 + 20000*sliderval;  
+                        double count = S0*fr; 
+                        int sample=0;
+                        int remain=0;
+                        if (count<buffsize){
+                            remain=(int)count;
+                        }else{
+                            sample=(int) (count/buffsize);
+                            remain=(int) (count-sample*buffsize);
+                        }
 
                         audioTrack.play();
-                        long startTime=System.currentTimeMillis();
-                        while(System.currentTimeMillis()-startTime<S0){
-                            fr =  2000 + 20000*sliderval;
+         
+                        for(int j=0; j<sample+1;j++){
+
                             for(int i=0; i < buffsize; i++){
                                 samples[i] = (short) (amp*Math.sin(ph));
                                 ph += twopi*fr/sr;
+                                if ((j==sample+1) && i>remain-1){
+                                    samples[i]=0;
+                                }
                             }
                             audioTrack.write(samples, 0, buffsize);
+
                         }
                         audioTrack.stop();
                         audioTrack.release();
