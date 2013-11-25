@@ -67,13 +67,13 @@ public class MainActivity extends Activity {
                             S0= Double.parseDouble(Sendtime.getText().toString())/1000.0;
                         }
                         
-                        short samples[] = new short[buffsize];
+                        
                         int amp = 10000;
                         double twopi = 8.*Math.atan(1.);
                         double ph = 0.0;
                         double fr =  2000 + 20000*sliderval;  
-                        double count = S0*fr; 
-                        int sample=0;
+                        double count = S0*sr; 
+                        int sample=1;
                         int remain=0;
                         if (count<buffsize){
                             remain=(int)count;
@@ -81,21 +81,19 @@ public class MainActivity extends Activity {
                             sample=(int) (count/buffsize);
                             remain=(int) (count-sample*buffsize);
                         }
-
+                        short samples[] = new short[buffsize*sample];
                         audioTrack.play();
          
-                        for(int j=0; j<sample+1;j++){
-
+                        for(int j=0; j<sample;j++){
                             for(int i=0; i < buffsize; i++){
-                                samples[i] = (short) (amp*Math.sin(ph));
+                                samples[j*buffsize+i] = (short) (amp*Math.sin(ph));
                                 ph += twopi*fr/sr;
-                                if ((j==sample+1) && i>remain-1){
-                                    samples[i]=0;
+                                if ((j==sample-1) && i>remain-1){
+                                    samples[j*buffsize+i]=(short)0;
                                 }
                             }
-                            audioTrack.write(samples, 0, buffsize);
-
                         }
+                        audioTrack.write(samples, 0, buffsize*sample);
                         audioTrack.stop();
                         audioTrack.release();
                     }
