@@ -68,7 +68,7 @@ public class MainActivity extends Activity {
                         }
                         
                         
-                        int amp = 10000;
+                        int amp = 32000;
                         double twopi = 8.*Math.atan(1.);
                         double ph = 0.0;
                         double fr =  2000 + 20000*sliderval;  
