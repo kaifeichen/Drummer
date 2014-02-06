@@ -1,11 +1,21 @@
 package edu.berkeley.drummer;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import org.json.JSONArray;
+
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.media.AudioFormat;
 import android.media.AudioManager;
+import android.media.AudioRecord;
 import android.media.AudioTrack;
+import android.media.MediaRecorder;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
@@ -16,6 +26,7 @@ import android.widget.TextView;
 
 public class MainActivity extends Activity {
     Thread t;
+    Thread s;
     int sr = 44100;
     long S0;
     boolean isRunning = true;
@@ -25,7 +36,7 @@ public class MainActivity extends Activity {
     EditText Sendtime;
     double sliderval;
     double maxDuration = 50;
-
+    
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -114,6 +125,73 @@ public class MainActivity extends Activity {
                         audioTrack.release();
                     }
                 };
+                
+                s = new Thread(){
+
+                    private volatile boolean mRun = true;
+                    private Long mStartEpoch;
+                    private AudioRecord mRecorder;
+                    private final JSONArray mRaw = new JSONArray();
+
+                    @Override
+                    public void run() {
+                      String filepath = Environment.getExternalStorageDirectory().getPath();
+//                    	String filepath = "/sdcard";
+                      FileOutputStream os = null;
+                      try {
+						os = new FileOutputStream(filepath+"/record.pcm");
+                      } catch (FileNotFoundException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+                      }
+                      try {
+                        int mChannel;
+//        				final int bufferSize = AudioRecord.getMinBufferSize(44100,
+//                            16, 2);
+                        final int bufferSize =  AudioRecord.getMinBufferSize(44100, AudioFormat.CHANNEL_IN_STEREO,
+                                AudioFormat.ENCODING_PCM_16BIT);
+        				System.out.println(bufferSize);
+        			
+//                        mRecorder = new AudioRecord(2, 44100, 16, 2,
+//                            bufferSize);
+        				mRecorder = new AudioRecord(MediaRecorder.AudioSource.CAMCORDER, 44100, AudioFormat.CHANNEL_IN_STEREO,
+                                AudioFormat.ENCODING_PCM_16BIT, bufferSize);
+
+                        mStartEpoch = System.currentTimeMillis();
+                        mRecorder.startRecording();
+
+                        while (!this.isInterrupted()) {
+                          final byte[] buffer = new byte[bufferSize];
+                          // blocking read, which returns when buffer.length bytes are recorded
+                          mRecorder.read(buffer, 0, buffer.length); // Bytes
+//                          for (final byte data : buffer) {
+//                            mRaw.put(data);
+//                            //save filec
+//                          }
+                          try {
+                              os.write(buffer);
+                          } catch (IOException e) {
+                              e.printStackTrace();
+                          }
+
+                        }
+                        try {
+                            os.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        mRecorder.stop();
+                        mRecorder.release();
+
+                      } catch (final Exception e) {
+                        e.printStackTrace();
+                      }
+                    }
+
+                    public void terminate() {
+                      mRun = false;
+                    }
+                  };
 
                 double duration = Double.parseDouble(Sendtime.getText()
                         .toString());
@@ -122,9 +200,21 @@ public class MainActivity extends Activity {
                     duration = maxDuration;
                     Sendtime.setText(Double.toString(duration));
                 }
+                         
+                s.start();
                 t.start();
+//                try {
+//					t.join();
+//				} catch (InterruptedException e) {
+//					e.printStackTrace();
+//				}
+                
+                
+                
             }
         });
+        
+        
     }
 
     @Override
@@ -137,6 +227,7 @@ public class MainActivity extends Activity {
     public void onDestroy() {
         super.onDestroy();
         isRunning = false;
+        s.interrupt();
         try {
             t.join();
         } catch (final InterruptedException e) {
