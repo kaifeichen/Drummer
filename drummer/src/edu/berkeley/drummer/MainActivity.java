@@ -100,9 +100,13 @@ public class MainActivity extends Activity {
                         for(int j=0; j<sample;j++){
                             for(int i=0; i < buffsize; i++){
 //                                samples[j*buffsize+i] = (short) (amp*Math.sin(ph));
-                                samples[j * buffsize + i] = (short) (amp * Math.sin(twopi*10*(Math.pow(2, ph)-1)/Math.log(2)));
+                                samples[j * buffsize + i] = (short) (amp * Math.sin(twopi*fr/10*(Math.pow(10, ph)-1)/Math.log(10)));
+//                            	samples[j*buffsize+i] = (short) (amp*Math.sin(twopi*(fr/10*ph+22050/2*ph*ph)));
 //                                ph += twopi*fr/sr;
-                                ph += fr/sr;
+//                            	System.out.println((short) (amp*Math.sin(twopi*(fr/10*ph+5/2*ph*ph))));
+//                            	System.out.println(ph);
+                                ph += 1.0/sr;
+//                                System.out.println((short) (amp*Math.sin(twopi*(fr/10/44100+5/2/44100/44100))));
                                 if ((j==sample-1) && i>remain-1){
                                     samples[j*buffsize+i]=(short)0;
                                 }
