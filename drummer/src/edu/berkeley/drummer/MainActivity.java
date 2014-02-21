@@ -78,12 +78,9 @@ public class MainActivity extends Activity {
                             S0= Double.parseDouble(Sendtime.getText().toString())/1000.0;
                         }
                         
-                        
-                        int amp = 32000;
-                        double twopi = 8.*Math.atan(1.);
-                        double ph = 0.0;
-                        double fr =  2000 + 20000*sliderval;  
+                         
                         double count = S0*sr; 
+
                         int sample=1;
                         int remain=0;
                         if (count<buffsize){
@@ -92,27 +89,11 @@ public class MainActivity extends Activity {
                             sample=(int) (count/buffsize);
                             remain=(int) (count-sample*buffsize);
                         }
-                        short samples[] = new short[buffsize*sample];
+
                         audioTrack.play();
-                        System.out.println("haha this is "+Integer.toString(sample));
-                        System.out.println(buffsize);
-                        System.out.println(count);
-                        for(int j=0; j<sample;j++){
-                            for(int i=0; i < buffsize; i++){
-//                                samples[j*buffsize+i] = (short) (amp*Math.sin(ph));
-                                samples[j * buffsize + i] = (short) (amp * Math.sin(twopi*fr/10*(Math.pow(10, ph)-1)/Math.log(10)));
-//                            	samples[j*buffsize+i] = (short) (amp*Math.sin(twopi*(fr/10*ph+22050/2*ph*ph)));
-//                                ph += twopi*fr/sr;
-//                            	System.out.println((short) (amp*Math.sin(twopi*(fr/10*ph+5/2*ph*ph))));
-//                            	System.out.println(ph);
-                                ph += 1.0/sr;
-//                                System.out.println((short) (amp*Math.sin(twopi*(fr/10/44100+5/2/44100/44100))));
-                                if ((j==sample-1) && i>remain-1){
-                                    samples[j*buffsize+i]=(short)0;
-                                }
-                            }
-                        }
-                        System.out.println(samples[442]);
+                        int start_fr = 1000;
+                        int end_fr = 2000;
+                        short samples[] = sample(S0, start_fr, end_fr, buffsize, sample, remain);
                         audioTrack.write(samples, 0, buffsize*sample);
                         audioTrack.stop();
                         audioTrack.release();
@@ -123,6 +104,33 @@ public class MainActivity extends Activity {
         });
     }
 
+    private short[] sample(double S0, double start_fr, double end_fr, int buffsize, int sample, int remain){
+        int amp = 32000;
+        double twopi = 8.*Math.atan(1.);
+        double ph = 0.0;
+        double fr =  2000 + 20000*sliderval;  
+
+
+    	short samples[] = new short[buffsize*sample];
+    	double k = 1;
+    	k = Math.pow(end_fr/start_fr, 1/S0);
+    	
+    	for(int j=0; j<sample;j++){
+            for(int i=0; i < buffsize; i++){
+                samples[j * buffsize + i] = (short) (amp * Math.sin(twopi*start_fr*(Math.pow(k, ph)-1)/Math.log(k)));
+                System.out.println(samples[j*buffsize+i]);
+                ph += 1.0/sr;
+
+                if ((j==sample-1) && i>remain-1){
+                    samples[j*buffsize+i]=(short)0;
+                }
+            }
+        }
+    	
+    	
+    	return samples;
+    }
+    
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
