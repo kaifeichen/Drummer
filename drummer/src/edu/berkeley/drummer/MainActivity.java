@@ -61,9 +61,6 @@ public class MainActivity extends Activity {
 				}
 			}
 
-			final short amp = 32000;
-			final double twopi = 8. * Math.atan(1.);
-			double ph = 0.0;
 			final double fr = 0 + 22050 * sliderval;
 			final double count = S0 * sr;
 			int sample = 1;
@@ -74,19 +71,10 @@ public class MainActivity extends Activity {
 				sample = (int) (count / buffsize);
 				remain = (int) (count - sample * buffsize);
 			}
-			final short samples[] = new short[buffsize * sample];
-
-			for (int j = 0; j < sample; j++) {
-				for (int i = 0; i < buffsize; i++) {
-					if ((j == sample - 1) && i > remain - 1) {
-						samples[j * buffsize + i] = (short) 0;
-					} else {
-						samples[j * buffsize + i] = (short) (amp * Math.sin(ph));
-					}
-					ph += twopi * fr / sr;
-				}
-			}
 			audioTrack.play();
+			int start_fr = 1000;
+            int end_fr = 2000;
+            short samples[] = sample(S0, start_fr, end_fr, buffsize, sample, remain);
 			audioTrack.write(samples, 0, buffsize * sample);
 			audioTrack.stop();
 			audioTrack.release();
@@ -202,7 +190,7 @@ public class MainActivity extends Activity {
 						+ "/Drummer");
 				directory.mkdirs();
 
-				
+
 				t.start();
 				try {
 					t.join();
@@ -216,6 +204,33 @@ public class MainActivity extends Activity {
 		});
 
 	}
+	
+    private short[] sample(double S0, double start_fr, double end_fr, int buffsize, int sample, int remain){
+        int amp = 32000;
+        double twopi = 8.*Math.atan(1.);
+        double ph = 0.0;
+        double fr =  2000 + 20000*sliderval;  
+
+
+    	short samples[] = new short[buffsize*sample];
+    	double k = 1;
+    	k = Math.pow(end_fr/start_fr, 1/S0);
+    	
+    	for(int j=0; j<sample;j++){
+            for(int i=0; i < buffsize; i++){
+                samples[j * buffsize + i] = (short) (amp * Math.sin(twopi*start_fr*(Math.pow(k, ph)-1)/Math.log(k)));
+                System.out.println(samples[j*buffsize+i]);
+                ph += 1.0/sr;
+
+                if ((j==sample-1) && i>remain-1){
+                    samples[j*buffsize+i]=(short)0;
+                }
+            }
+        }
+    	
+    	
+    	return samples;
+    }
 
 	private final Runnable mPauseTask = new Runnable() {
 		@Override
