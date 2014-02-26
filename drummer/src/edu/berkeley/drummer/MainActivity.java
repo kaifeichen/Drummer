@@ -4,11 +4,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 
-import org.json.JSONArray;
-
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.media.AudioFormat;
 import android.media.AudioManager;
@@ -18,6 +14,7 @@ import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.text.Editable;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
@@ -26,105 +23,107 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
-public class MainActivity extends Activity {
-	private AudioSendThread t;
-	private AudioRecordThread s;
-	int sr = 44100;
-	long S0;
-	boolean isRunning = true;
-	SeekBar fSlider;
-	TextView Viewer;
-	Button Send;
-	EditText Sendtime;
-	double sliderval;
-	double maxDuration = 50;
+public class MainActivity extends Activity
+		implements
+			View.OnClickListener,
+			OnSeekBarChangeListener {
+	private AudioSendThread mSendThread;
+	private AudioRecordThread mRecordThread;
+	private final int mSampleRate = 44100;
+	private SeekBar mFreqBar;
+	private TextView mTextView;
+	private Button mSendButton;
+	private EditText mDurationText;
+	private double sliderval;
+	private final double maxDuration = 100; // in millisecond
+	private final int maxAmp = 32000;
 	private Handler mHandler;
 
 	private class AudioSendThread extends Thread {
-		@Override
-		public void run() {
+		private final int mBufSize;
+		private final AudioTrack mAudioTrack;
+		// TODO make two input box/ two slider for these two freq
+		final int startfreq = 5000;
+		final int endFreq = 5100;
+		private final short mSamples[];
 
-			setPriority(Thread.MAX_PRIORITY);
-
-			final int buffsize = AudioTrack.getMinBufferSize(sr,
+		public AudioSendThread() {
+			// TODO buffsize and audioTrack should be created in onCreate
+			mBufSize = AudioTrack.getMinBufferSize(mSampleRate,
 					AudioFormat.CHANNEL_OUT_MONO,
 					AudioFormat.ENCODING_PCM_16BIT);
-			final AudioTrack audioTrack = new AudioTrack(
-					AudioManager.STREAM_ALARM, sr,
-					AudioFormat.CHANNEL_OUT_MONO,
-					AudioFormat.ENCODING_PCM_16BIT, buffsize,
+			mAudioTrack = new AudioTrack(AudioManager.STREAM_ALARM,
+					mSampleRate, AudioFormat.CHANNEL_OUT_MONO,
+					AudioFormat.ENCODING_PCM_16BIT, mBufSize,
 					AudioTrack.MODE_STREAM);
-			double S0 = 0;
-			if (Sendtime.getText() != null) {
-				if (Sendtime.getText().toString().length() > 0) {
-					S0 = Double.parseDouble(Sendtime.getText().toString()) / 1000.0;
-				}
+			double duration = 0;
+			final Editable durationText = mDurationText.getText();
+			if (durationText != null && durationText.toString().length() > 0) {
+				duration = Double.parseDouble(durationText.toString()) / 1000.0;
 			}
 
-			final double fr = 0 + 22050 * sliderval;
-			final double count = S0 * sr;
-			int sample = 1;
-			int remain = 0;
-			if (count < buffsize) {
-				remain = (int) count;
-			} else {
-				sample = (int) (count / buffsize);
-				remain = (int) (count - sample * buffsize);
-			}
-			audioTrack.play();
-			int start_fr = 1000;
-            int end_fr = 2000;
-            short samples[] = sample(S0, start_fr, end_fr, buffsize, sample, remain);
-			audioTrack.write(samples, 0, buffsize * sample);
-			audioTrack.stop();
-			audioTrack.release();
+			mSamples = genSamples(duration, startfreq, endFreq, mBufSize,
+					mSampleRate, maxAmp);
+		}
+
+		@Override
+		public void run() {
+			setPriority(Thread.MAX_PRIORITY);
+			mAudioTrack.play();
+			mAudioTrack.write(mSamples, 0, mSamples.length);
+			mAudioTrack.stop();
+			mAudioTrack.release();
 		}
 	}
 
 	private class AudioRecordThread extends Thread {
 		private volatile boolean mRun = true;
-		private AudioRecord mRecorder;
-		private BufferedOutputStream os = null;
+		private final AudioRecord mRecorder;
+		private BufferedOutputStream mOutStream;
+		private final int mBufSize;
 
-		@Override
-		public void run() {
+		public AudioRecordThread() {
 			final File sdCard = Environment.getExternalStorageDirectory();
 			final File directory = new File(sdCard.getAbsolutePath()
 					+ "/Drummer");
 			final String fileName = Long.toString(System.currentTimeMillis())
-					+ ".pcm";
+					+ ".dat";
 			final File file = new File(directory, fileName);
+
 			try {
-				os = new BufferedOutputStream(new FileOutputStream(file));
-			} catch (FileNotFoundException e1) {
+				mOutStream = new BufferedOutputStream(
+						new FileOutputStream(file));
+			} catch (final FileNotFoundException e) {
 				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				e.printStackTrace();
 			}
+
+			// TODO buffsize and mRecorder should be created in onCreate
+			mBufSize = AudioRecord
+					.getMinBufferSize(mSampleRate, AudioFormat.CHANNEL_IN_MONO,
+							AudioFormat.ENCODING_PCM_16BIT);
+			mRecorder = new AudioRecord(MediaRecorder.AudioSource.CAMCORDER,
+					mSampleRate, AudioFormat.CHANNEL_IN_MONO,
+					AudioFormat.ENCODING_PCM_16BIT, mBufSize);
+		}
+
+		@Override
+		public void run() {
+			// setPriority(Thread.MAX_PRIORITY);
 			try {
-				final int bufferSize = AudioRecord.getMinBufferSize(44100,
-						AudioFormat.CHANNEL_IN_MONO,
-						AudioFormat.ENCODING_PCM_16BIT);
-				System.out.println(bufferSize);
-				mRecorder = new AudioRecord(
-						MediaRecorder.AudioSource.CAMCORDER, 44100,
-						AudioFormat.CHANNEL_IN_MONO,
-						AudioFormat.ENCODING_PCM_16BIT, bufferSize);
-
 				mRecorder.startRecording();
-
 				while (mRun == true) {
-					final byte[] buffer = new byte[bufferSize];
+					final byte[] buffer = new byte[mBufSize];
 					// blocking read, which returns when
 					// buffer.length bytes are recorded
 					mRecorder.read(buffer, 0, buffer.length); // Bytes
-
-					os.write(buffer);
+					System.out.print(buffer);
+					mOutStream.write(buffer);
 				}
-				os.flush();
-				os.close();
+				mOutStream.flush();
+				mOutStream.close();
 				mRecorder.stop();
 				mRecorder.release();
-
 			} catch (final Exception e) {
 				e.printStackTrace();
 			}
@@ -139,113 +138,112 @@ public class MainActivity extends Activity {
 	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		fSlider = (SeekBar) findViewById(R.id.frequency);
-		Viewer = (TextView) findViewById(R.id.frequencytext);
-		Send = (Button) findViewById(R.id.send_button);
-		Sendtime = (EditText) findViewById(R.id.timemilisec);
+		mFreqBar = (SeekBar) findViewById(R.id.freq_bar);
+		mTextView = (TextView) findViewById(R.id.freq_text);
+		mSendButton = (Button) findViewById(R.id.send_button);
+		mDurationText = (EditText) findViewById(R.id.duration_text);
 		mHandler = new Handler();
 
-		final OnSeekBarChangeListener listener = new OnSeekBarChangeListener() {
-			@Override
-			public void onStopTrackingTouch(final SeekBar seekBar) {
-			}
+		mFreqBar.setOnSeekBarChangeListener(this);
+		mSendButton.setOnClickListener(this);
 
-			@Override
-			public void onStartTrackingTouch(final SeekBar seekBar) {
-			}
-
-			@Override
-			public void onProgressChanged(final SeekBar seekBar,
-					final int progress, final boolean fromUser) {
-				if (fromUser)
-					sliderval = progress / (double) seekBar.getMax();
-				Viewer.setText(Double.toString(0 + 22050 * sliderval));
-
-			}
-		};
-
-		fSlider.setOnSeekBarChangeListener(listener);
-
-		Send.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(final View v) {
-				Send.setEnabled(false);
-				t = new AudioSendThread();
-				s = new AudioRecordThread();
-
-				double sendDuration = Double.parseDouble(Sendtime.getText()
-						.toString());
-
-				if (sendDuration > maxDuration) {
-					sendDuration = maxDuration;
-					Sendtime.setText(Double.toString(sendDuration));
-				}
-
-				long recvDuration = 1000;
-
-				// This will get the SD Card directory and create a folder named
-				// MyFiles in it.
-				final File sdCard = Environment.getExternalStorageDirectory();
-				final File directory = new File(sdCard.getAbsolutePath()
-						+ "/Drummer");
-				directory.mkdirs();
-
-
-				t.start();
-				try {
-					t.join();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				s.start();
-				mHandler.postDelayed(mPauseTask, recvDuration);
-			}
-		});
-
+		// This will get the SD Card directory and create a folder named
+		// Drummer in it.
+		final File sdCard = Environment.getExternalStorageDirectory();
+		final File directory = new File(sdCard.getAbsolutePath() + "/Drummer");
+		directory.mkdirs();
 	}
-	
-    private short[] sample(double S0, double start_fr, double end_fr, int buffsize, int sample, int remain){
-        int amp = 32000;
-        double twopi = 8.*Math.atan(1.);
-        double ph = 0.0;
-        double fr =  2000 + 20000*sliderval;  
 
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		mRecordThread.terminate();
+		try {
+			mSendThread.join();
+		} catch (final InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
 
-    	short samples[] = new short[buffsize*sample];
-    	double k = 1;
-    	k = Math.pow(end_fr/start_fr, 1/S0);
-    	
-    	for(int j=0; j<sample;j++){
-            for(int i=0; i < buffsize; i++){
-                samples[j * buffsize + i] = (short) (amp * Math.sin(twopi*start_fr*(Math.pow(k, ph)-1)/Math.log(k)));
-                System.out.println(samples[j*buffsize+i]);
-                ph += 1.0/sr;
+	private static final short[] genSamples(final double duration,
+			final double startFreq, final double endFreq, final int buffsize,
+			final int sampleRate, final int maxAmp) {
+		final double count = duration * sampleRate;
+		int sampleNum = 1;
+		int remain = 0;
+		if (count < buffsize) {
+			remain = (int) count;
+		} else {
+			sampleNum = (int) (count / buffsize);
+			remain = (int) (count - sampleNum * buffsize);
+		}
 
-                if ((j==sample-1) && i>remain-1){
-                    samples[j*buffsize+i]=(short)0;
-                }
-            }
-        }
-    	
-    	
-    	return samples;
-    }
+		final double twopi = 2. * Math.PI;
+		double phase = 0.0;
+
+		final short samples[] = new short[buffsize * sampleNum];
+		// TODO put the equation in comment
+		double k = 1;
+		k = Math.pow(endFreq / startFreq, 1 / duration);
+
+		// TODO make this iterate over all timestamps and call function to get
+		// the value
+		for (int j = 0; j < sampleNum; j++) {
+			for (int i = 0; i < buffsize; i++) {
+				samples[j * buffsize + i] = (short) (maxAmp * Math.sin(twopi
+						* startFreq * (Math.pow(k, phase) - 1) / Math.log(k)));
+				phase += 1.0 / sampleRate;
+
+				if ((j == sampleNum - 1) && i > remain - 1) {
+					samples[j * buffsize + i] = (short) 0;
+				}
+			}
+		}
+
+		return samples;
+	}
 
 	private final Runnable mPauseTask = new Runnable() {
 		@Override
 		public void run() {
-			s.terminate();
+			mRecordThread.terminate();
 			try {
-				s.join();
+				mRecordThread.join();
 			} catch (final InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			mHandler.removeCallbacks(mPauseTask);
-			Send.setEnabled(true);
+			mSendButton.setEnabled(true);
 		}
 	};
+
+	@Override
+	public void onClick(final View v) {
+		mSendButton.setEnabled(false);
+		mSendThread = new AudioSendThread();
+		mRecordThread = new AudioRecordThread();
+
+		double sendDuration = Double.parseDouble(mDurationText.getText()
+				.toString());
+
+		if (sendDuration > maxDuration) {
+			sendDuration = maxDuration;
+			mDurationText.setText(Double.toString(sendDuration));
+		}
+
+		final long recvDuration = 1000;
+
+		mRecordThread.start();
+		mSendThread.start();
+		try {
+			mSendThread.join();
+		} catch (final InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		mHandler.postDelayed(mPauseTask, recvDuration);
+	}
 
 	@Override
 	public boolean onCreateOptionsMenu(final Menu menu) {
@@ -254,15 +252,24 @@ public class MainActivity extends Activity {
 	}
 
 	@Override
-	public void onDestroy() {
-		super.onDestroy();
-		isRunning = false;
-		s.interrupt();
-		try {
-			t.join();
-		} catch (final InterruptedException e) {
-			e.printStackTrace();
+	public void onProgressChanged(final SeekBar seekBar, final int progress,
+			final boolean fromUser) {
+		if (fromUser) {
+			sliderval = progress / (double) seekBar.getMax();
 		}
-		t = null;
+		mTextView.setText(Double.toString(0 + 22050 * sliderval));
+
+	}
+
+	@Override
+	public void onStartTrackingTouch(final SeekBar seekBar) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onStopTrackingTouch(final SeekBar seekBar) {
+		// TODO Auto-generated method stub
+
 	}
 }

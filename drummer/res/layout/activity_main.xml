@@ -11,24 +11,24 @@
     tools:context=".MainActivity" >
 
     <TextView
-        android:id="@+id/frequencytext"
+        android:id="@+id/freq_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Frequency" />
 
     <SeekBar
-        android:id="@+id/frequency"
+        android:id="@+id/freq_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
     
     <TextView
-        android:id="@+id/timetext"
+        android:id="@+id/duration_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="time" />
+        android:text="Duration" />
 
     <EditText
-        android:id="@+id/timemilisec"
+        android:id="@+id/duration_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ems="8"
