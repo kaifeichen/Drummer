@@ -7,37 +7,21 @@ import java.io.FileOutputStream;
 
 import android.app.Activity;
 import android.media.AudioFormat;
-import android.media.AudioManager;
 import android.media.AudioRecord;
-import android.media.AudioTrack;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.text.Editable;
-import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.SeekBar;
-import android.widget.SeekBar.OnSeekBarChangeListener;
-import android.widget.TextView;
 
-public class ReceiverActivity extends Activity
-		implements
-			View.OnClickListener,
-			OnSeekBarChangeListener {
+public class ReceiverActivity extends Activity implements View.OnClickListener {
 	private AudioRecordThread mRecordThread;
 	private final int mSampleRate = 44100;
-	private SeekBar mFreqBar;
-	private TextView mTextView;
-	private Button mSendButton;
 	private EditText mDurationText;
-	private double sliderval;
-	private final double maxDuration = 100; // in millisecond
-	private final int maxAmp = 32000;
+	private Button mRecvButton;
 	private Handler mHandler;
-
 
 	private class AudioRecordThread extends Thread {
 		private volatile boolean mRun = true;
@@ -91,7 +75,6 @@ public class ReceiverActivity extends Activity
 				e.printStackTrace();
 			}
 		}
-
 		public void terminate() {
 			mRun = false;
 		}
@@ -101,14 +84,11 @@ public class ReceiverActivity extends Activity
 	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		mFreqBar = (SeekBar) findViewById(R.id.freq_bar);
-		mTextView = (TextView) findViewById(R.id.freq_text);
-		mSendButton = (Button) findViewById(R.id.send_button);
-		mDurationText = (EditText) findViewById(R.id.duration_text);
+		mRecvButton = (Button) findViewById(R.id.recv_button);
+		mDurationText = (EditText) findViewById(R.id.recv_duration_text);
 		mHandler = new Handler();
 
-		mFreqBar.setOnSeekBarChangeListener(this);
-		mSendButton.setOnClickListener(this);
+		mRecvButton.setOnClickListener(this);
 
 		// This will get the SD Card directory and create a folder named
 		// Drummer in it.
@@ -127,7 +107,7 @@ public class ReceiverActivity extends Activity
 			e.printStackTrace();
 		}
 	}
-	
+
 	private final Runnable mPauseTask = new Runnable() {
 		@Override
 		public void run() {
@@ -139,54 +119,19 @@ public class ReceiverActivity extends Activity
 				e.printStackTrace();
 			}
 			mHandler.removeCallbacks(mPauseTask);
-			mSendButton.setEnabled(true);
+			mRecvButton.setEnabled(true);
 		}
 	};
 
 	@Override
 	public void onClick(final View v) {
-		mSendButton.setEnabled(false);
+		mRecvButton.setEnabled(false);
 		mRecordThread = new AudioRecordThread();
 
-		double sendDuration = Double.parseDouble(mDurationText.getText()
+		final long recvDuration = Long.parseLong(mDurationText.getText()
 				.toString());
-
-		if (sendDuration > maxDuration) {
-			sendDuration = maxDuration;
-			mDurationText.setText(Double.toString(sendDuration));
-		}
-
-		final long recvDuration = 3000;
 
 		mRecordThread.start();
 		mHandler.postDelayed(mPauseTask, recvDuration);
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(final Menu menu) {
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
-	}
-
-	@Override
-	public void onProgressChanged(final SeekBar seekBar, final int progress,
-			final boolean fromUser) {
-		if (fromUser) {
-			sliderval = progress / (double) seekBar.getMax();
-		}
-		mTextView.setText(Double.toString(0 + 22050 * sliderval));
-
-	}
-
-	@Override
-	public void onStartTrackingTouch(final SeekBar seekBar) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void onStopTrackingTouch(final SeekBar seekBar) {
-		// TODO Auto-generated method stub
-
 	}
 }

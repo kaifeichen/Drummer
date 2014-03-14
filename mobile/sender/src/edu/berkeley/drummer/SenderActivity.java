@@ -5,8 +5,6 @@ import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -25,9 +23,9 @@ public class SenderActivity extends Activity implements View.OnClickListener {
 		private final int mBufSize;
 		private final AudioTrack mAudioTrack;
 		// TODO make two input box/ two slider for these two frequency
-		final int startFreq = Integer.parseInt(mStartFreqText.getText()
+		final int mStartFreq = Integer.parseInt(mStartFreqText.getText()
 				.toString());
-		final int stopFreq = Integer.parseInt(mStopFreqText.getText()
+		final int mStopFreq = Integer.parseInt(mStopFreqText.getText()
 				.toString());
 		private final short mSamples[];
 
@@ -46,11 +44,8 @@ public class SenderActivity extends Activity implements View.OnClickListener {
 				duration = Double.parseDouble(durationText.toString()) / 1000.0;
 			}
 
-			mSamples = genSamples(duration, startFreq, stopFreq, mBufSize,
+			mSamples = genSamples(duration, mStartFreq, mStopFreq, mBufSize,
 					mSampleRate, maxAmp);
-
-			Log.i("Drummer Sender", Integer.toString(mSamples[11]));
-			Log.i("Drummer Sender", Integer.toString(mSamples[555]));
 		}
 		@Override
 		public void run() {
@@ -136,11 +131,5 @@ public class SenderActivity extends Activity implements View.OnClickListener {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(final Menu menu) {
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
 	}
 }
