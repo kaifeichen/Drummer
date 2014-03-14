@@ -1,42 +1,34 @@
 package edu.berkeley.drummer;
 
-import java.io.File;
-
 import android.app.Activity;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.os.Bundle;
-import android.os.Environment;
-import android.text.Editable;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.SeekBar;
-import android.widget.SeekBar.OnSeekBarChangeListener;
-import android.widget.TextView;
 
-public class SenderActivity extends Activity
-		implements
-			View.OnClickListener,
-			OnSeekBarChangeListener {
+public class SenderActivity extends Activity implements View.OnClickListener {
 	private AudioSendThread mSendThread;
 	private final int mSampleRate = 44100;
-	private SeekBar mFreqBar;
-	private TextView mTextView;
-	private Button mSendButton;
+	private EditText mStartFreqText;
+	private EditText mStopFreqText;
 	private EditText mDurationText;
-	private double sliderval;
+	private Button mSendButton;
 	private final double maxDuration = 100; // in millisecond
 	private final int maxAmp = 32000;
 
 	private class AudioSendThread extends Thread {
 		private final int mBufSize;
 		private final AudioTrack mAudioTrack;
-		// TODO make two input box/ two slider for these two freq
-		final int startfreq = 5000;
-		final int endFreq = 5100;
+		// TODO make two input box/ two slider for these two frequency
+		final int startFreq = Integer.parseInt(mStartFreqText.getText()
+				.toString());
+		final int stopFreq = Integer.parseInt(mStopFreqText.getText()
+				.toString());
 		private final short mSamples[];
 
 		public AudioSendThread() {
@@ -49,15 +41,17 @@ public class SenderActivity extends Activity
 					AudioFormat.ENCODING_PCM_16BIT, mBufSize,
 					AudioTrack.MODE_STREAM);
 			double duration = 0;
-			final Editable durationText = mDurationText.getText();
+			final CharSequence durationText = mDurationText.getText();
 			if (durationText != null && durationText.toString().length() > 0) {
 				duration = Double.parseDouble(durationText.toString()) / 1000.0;
 			}
 
-			mSamples = genSamples(duration, startfreq, endFreq, mBufSize,
+			mSamples = genSamples(duration, startFreq, stopFreq, mBufSize,
 					mSampleRate, maxAmp);
-		}
 
+			Log.i("Drummer Sender", Integer.toString(mSamples[11]));
+			Log.i("Drummer Sender", Integer.toString(mSamples[555]));
+		}
 		@Override
 		public void run() {
 			setPriority(Thread.MAX_PRIORITY);
@@ -72,19 +66,12 @@ public class SenderActivity extends Activity
 	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		mFreqBar = (SeekBar) findViewById(R.id.freq_bar);
-		mTextView = (TextView) findViewById(R.id.freq_text);
-		mSendButton = (Button) findViewById(R.id.send_button);
+		mStartFreqText = (EditText) findViewById(R.id.start_freq_text);
+		mStopFreqText = (EditText) findViewById(R.id.stop_freq_text);
 		mDurationText = (EditText) findViewById(R.id.duration_text);
+		mSendButton = (Button) findViewById(R.id.send_button);
 
-		mFreqBar.setOnSeekBarChangeListener(this);
 		mSendButton.setOnClickListener(this);
-
-		// This will get the SD Card directory and create a folder named
-		// Drummer in it.
-		final File sdCard = Environment.getExternalStorageDirectory();
-		final File directory = new File(sdCard.getAbsolutePath() + "/Drummer");
-		directory.mkdirs();
 	}
 
 	@Override
@@ -93,7 +80,7 @@ public class SenderActivity extends Activity
 	}
 
 	private static final short[] genSamples(final double duration,
-			final double startFreq, final double endFreq, final int buffsize,
+			final double startFreq, final double stopFreq, final int buffsize,
 			final int sampleRate, final int maxAmp) {
 		final double count = duration * sampleRate;
 		int sampleNum = 1;
@@ -111,7 +98,7 @@ public class SenderActivity extends Activity
 		final short samples[] = new short[buffsize * sampleNum];
 		// TODO put the equation in comment
 		double k = 1;
-		k = Math.pow(endFreq / startFreq, 1 / duration);
+		k = Math.pow(stopFreq / startFreq, 1 / duration);
 
 		// TODO make this iterate over all timestamps and call function to get
 		// the value
@@ -155,27 +142,5 @@ public class SenderActivity extends Activity
 	public boolean onCreateOptionsMenu(final Menu menu) {
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
-	}
-
-	@Override
-	public void onProgressChanged(final SeekBar seekBar, final int progress,
-			final boolean fromUser) {
-		if (fromUser) {
-			sliderval = progress / (double) seekBar.getMax();
-		}
-		mTextView.setText(Double.toString(0 + 22050 * sliderval));
-
-	}
-
-	@Override
-	public void onStartTrackingTouch(final SeekBar seekBar) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void onStopTrackingTouch(final SeekBar seekBar) {
-		// TODO Auto-generated method stub
-
 	}
 }
