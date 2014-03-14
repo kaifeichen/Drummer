@@ -229,4 +229,4 @@ zentus-sqlite-license.txt
 
 
 #paper related files
-!/paper/relwork/*.pdf
+#!/paper/relwork/*.pdf
