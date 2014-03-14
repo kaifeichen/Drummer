@@ -1,0 +1,34 @@
+\section{Introduction}
+\label{sec:intro}
+
+Knowing the environment is of great importance to bring intelligence into our lives. 
+In indoor environments, environment awareness includes information such as size of 
+current room, surrounding objects, 3D visual model. \fxnote{applications}
+
+
+To learn the environment, computer vision techniques has been proposed to capture 
+and reconstruct things from video and images, such as objects 
+\cite{rothganger20063d}, scenes \cite{snavely2006photo}, and buildings 
+\cite{furukawa2009reconstructing}. These techniques require fairly amount of 
+data and heavy post-processing computation. In addition, depth information from 
+RGB-D cameras are used to enable interactive real time 3D visual modeling, 
+especially while RGB-D sensors are getting cheaper, such as Microsoft Kinect 
+\cite{du2011interactive, izadi2011kinectfusion}.
+
+
+However, RGB-D cameras are still not available for most people. And privacy 
+concerns could be raised when reconstructing visual model of open spaces, 
+especially in indoor environment, where private information can be more 
+heterogeneous compared to outdoor situation. More importantly, not all 
+applications actually require accurate and complete model of environment. 
+For example, with the knowledge of floor plan, we can infer what a person 
+is doing simply by acquiring a coarse estimation of her/his location. 
+%Standing in front of projection screen implies she/he is presenting, 
+
+
+We propose to use acoustic echo to probe the environment, and build coarse 3D model 
+of the environment. Microphones and speakers are available on almost all phones, 
+which makes crowd-sourcing possible. And 
+sensing the echo of a sound pulse will bring up almost no privacy concerns. We are 
+trying to look at how accurate we can achieve to reconstruct 3D in-room model, and 
+how much benefits we can introduce to existing techniques.
