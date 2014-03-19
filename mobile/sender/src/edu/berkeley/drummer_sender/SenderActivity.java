@@ -1,4 +1,4 @@
-package edu.berkeley.drummer;
+package edu.berkeley.drummer_sender;
 
 import android.app.Activity;
 import android.media.AudioFormat;

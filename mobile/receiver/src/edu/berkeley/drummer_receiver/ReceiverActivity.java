@@ -1,4 +1,4 @@
-package edu.berkeley.drummer;
+package edu.berkeley.drummer_receiver;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
