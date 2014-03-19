@@ -214,6 +214,7 @@ _build
 # Data files
 *.db
 *.csv
+*.dat
 
 # Twisted Log Files
 *.log
@@ -227,6 +228,9 @@ _build
 *.graffle
 zentus-sqlite-license.txt
 
+#Octave
+octave-workspace
 
 #paper related files
 #!/paper/relwork/*.pdf
+!/paper/Physical Analytics 2014/fig/*.pdf
