@@ -5,55 +5,63 @@ import scipy as sp
 import struct
 import matplotlib.pyplot as plt
 from scipy import optimize
-FILE = '1wal_180d_20ft_10ms.2.dat'
-RESULT = 'RESULT.txt'
+
 TIME = 1.0/44100
 
-def reduction(filename, startf=5000.0, endf=5100.0, length=10.0):
+def reduce(data, origin_func):
     results = []
-    counter = 0
-    data = read(filename)
-    for elem in data:
-        if elem > 15000:
-            for i in range(int(length/1000/TIME)):
-                results.append(data[counter+i])
-            break;
-        counter+=1
-    amp = max(results)
-    print amp
-    value = 0
-    starttime = 0
-    for j in range(160):
-        start = j*TIME/80.0
-        origin = [function(start, amp, startf, endf, length) for i in range(len(results))]
-        local_max = max(np.correlate(origin, results, "full"))
-        if (local_max>value):
-            starttime = start
-            value = local_max
-        print "got here"
+    # data = [0,1,2,3,4,5]
 
-    f = open(RESULT, 'w')
+    # get index of first value in data that is larger than 10000
+    # TODO this value (15000) needs to be changed when freq is not around 5K Hz
+    offset = (i for i,v in enumerate(data) if v > 0.7).next()
+    results = data[offset:offset+int(origin_func.duration/TIME)]
+    # print amp
+    value = 1000000000000000000
+    starttime = 0
+    # TODO this value (160) needs to be changed when freq is not around 5K Hz
+    for start in np.arange(0, 10*TIME, TIME/10):
+        # origin = [function(start, amp, startf, endf, length) for i in range(len(results))]
+        # origin = [function(start) for  in range(len(results))]
+        origin = []
+        error = 0
+        for i in range(30):
+            # origin.append(function(start+i*TIME))
+            error+=abs(results[i]-origin_func(start+i*TIME))
+        # local_max = max(np.correlate(origin, results, "full"))
+        # error = [(results[i]-origin[i]) for i in range(len(results))]
+        #print error
+        if (error<value):
+            starttime = start
+            value = error
+        #print "got here", j
+
+    #f = open(RESULT, 'w')
     num = 0
     plot1 = []
+    kaifei_now=[]
+    kaifei_past=[]
     # print len(data)
     # print len(results)
     while (num<len(data)):
-        if (num>=counter and num < counter+len(results)):
+        if (num>=offset and num < offset+len(results)):
             now = data[num]
-            past = function(starttime + TIME*(num-counter), amp, startf, endf, length)
-            f.write(str(now-past)+' ')
+            past = origin_func(starttime + TIME*(num-offset))
+            #f.write(str(now-past)+' ')
             plot1.append(now-past)
-            print now
-            print past
+            kaifei_past.append(past)
+            kaifei_now.append(now)
         
         else:
-            f.write(str(data[num])+' ')
+            #f.write(str(data[num])+' ')
             plot1.append(data[num])
-        num+=1  
+        num+=1
     # plt.plot(plot1)
     # plt.show()
 
-        
+    print "a =", kaifei_now
+    print "b =", kaifei_past
+    return np.array(kaifei_now) - np.array(kaifei_past)
 
     # with open(filename, 'r') as inputfile:
     #     linenumber = 0
@@ -97,13 +105,10 @@ def reduction(filename, startf=5000.0, endf=5100.0, length=10.0):
 #     a= abs(sp.optimize.newton(func, -800, None, (point1, point2)))
 #     return a
 
-def function(t, a, start_fr, end_fr, length):
-    k = math.pow(end_fr/start_fr, 1.0/length);
-    den = math.log(k)
-    num = math.pow(k,t)-1
-    rest = math.pi*2*start_fr
-    result = math.sin(1.0*num*rest/den)
-    return a*result
+
+
+# def function(t):
+#     return t
 
 
 def func(a, point1, point2):
