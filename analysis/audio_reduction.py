@@ -14,18 +14,18 @@ def reduce(data, origin_func):
 
     # get index of first value in data that is larger than 10000
     # TODO this value (15000) needs to be changed when freq is not around 5K Hz
-    offset = (i for i,v in enumerate(data) if v > 0.7).next()
+    offset = (i for i,v in enumerate(data) if v > 15000).next()
     results = data[offset:offset+int(origin_func.duration/TIME)]
     # print amp
     value = 1000000000000000000
     starttime = 0
     # TODO this value (160) needs to be changed when freq is not around 5K Hz
-    for start in np.arange(0, 10*TIME, TIME/10):
+    for start in np.arange(0, 2*TIME, TIME/80):
         # origin = [function(start, amp, startf, endf, length) for i in range(len(results))]
         # origin = [function(start) for  in range(len(results))]
         origin = []
         error = 0
-        for i in range(30):
+        for i in range(10):
             # origin.append(function(start+i*TIME))
             error+=abs(results[i]-origin_func(start+i*TIME))
         # local_max = max(np.correlate(origin, results, "full"))

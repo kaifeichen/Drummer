@@ -35,7 +35,7 @@ def plot(fname):
 def chirp_func(t, a, start_fr, end_fr, length):
     k = math.pow(float(end_fr)/start_fr, 1.0/length)
     den = math.log(k)
-    num = math.pow(k,t) - 1
+    num = math.pow(k,t)-1
     rest = math.pi*2*start_fr
     result = math.sin(1.0*num*rest/den)
     return a*result
@@ -50,15 +50,14 @@ if __name__ ==  "__main__":
     f = open(fname, 'rb')
     data = f.read()
     amp = np.array(struct.unpack("<"+"h"*(len(data)/2), data))
-    lowcut = lowfreq - 500
-    highcut = highfreq + 500
+    lowcut = lowfreq - 1000
+    highcut = highfreq + 1000
     fs = 44100
 
     filtered_amp = bpfilter.butter_bandpass_filter(amp, lowcut, highcut, fs, order=6)
-    normal_amp = amp/max(abs(amp))
-    origin_chirp_func = lambda t: chirp_func(t, max(abs(normal_amp)), lowfreq, highfreq, duration)
+    origin_chirp_func = lambda t: chirp_func(t, max(abs(filtered_amp)), lowfreq, highfreq, duration)
     origin_chirp_func.duration = duration
-    reduced_amp = reduction.reduce(normal_amp, origin_chirp_func)
+    reduced_amp = reduction.reduce(filtered_amp, origin_chirp_func)
 
    # plt.plot(filtered_amp, 'b', alpha=0.2)
     plt.plot(reduced_amp, 'r', alpha=0.3)
