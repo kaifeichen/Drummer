@@ -22,6 +22,7 @@ public class ReceiverActivity extends Activity implements View.OnClickListener {
 	private EditText mDurationText;
 	private Button mRecvButton;
 	private Handler mHandler;
+	private IMU mIMU;
 
 	private class AudioRecordThread extends Thread {
 		private volatile boolean mRun = true;
@@ -87,7 +88,6 @@ public class ReceiverActivity extends Activity implements View.OnClickListener {
 		mRecvButton = (Button) findViewById(R.id.recv_button);
 		mDurationText = (EditText) findViewById(R.id.recv_duration_text);
 		mHandler = new Handler();
-
 		mRecvButton.setOnClickListener(this);
 
 		// This will get the SD Card directory and create a folder named
@@ -95,17 +95,22 @@ public class ReceiverActivity extends Activity implements View.OnClickListener {
 		final File sdCard = Environment.getExternalStorageDirectory();
 		final File directory = new File(sdCard.getAbsolutePath() + "/Drummer");
 		directory.mkdirs();
+
+		mIMU = new IMU(this);
 	}
 
 	@Override
-	public void onDestroy() {
-		super.onDestroy();
-		mRecordThread.terminate();
-		try {
-			mRecordThread.join();
-		} catch (final InterruptedException e) {
-			e.printStackTrace();
+	public void onPause() {
+		mIMU.stop();
+		if (mRecordThread != null) {
+			mRecordThread.terminate();
+			try {
+				mRecordThread.join();
+			} catch (final InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
+		super.onPause();
 	}
 
 	private final Runnable mPauseTask = new Runnable() {
@@ -118,6 +123,7 @@ public class ReceiverActivity extends Activity implements View.OnClickListener {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			mRecordThread = null;
 			mHandler.removeCallbacks(mPauseTask);
 			mRecvButton.setEnabled(true);
 		}

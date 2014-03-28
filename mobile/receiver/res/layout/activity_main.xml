@@ -35,4 +35,22 @@
         android:layout_height="wrap_content"
         android:text="Listen" />
 
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/start_imu_button"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:text="Start Move" />
+
+        <Button
+            android:id="@+id/stop_imu_button"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:text="Stop Move" />
+    </LinearLayout>
+
 </LinearLayout>

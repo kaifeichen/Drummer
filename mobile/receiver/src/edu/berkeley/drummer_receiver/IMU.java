@@ -1,0 +1,230 @@
+package edu.berkeley.drummer_receiver;
+
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Context;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.os.Build;
+import android.os.Environment;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.Toast;
+
+public class IMU {
+	private final Activity mActivity;
+	private final Button mStartButton;
+	private final Button mStopButton;
+	private boolean running = false;
+	private final File mLinearAccDir;
+	private final File mMagneticDir;
+	private final File mRotationDir;
+	private BufferedOutputStream mLinearAccOS;
+	private BufferedOutputStream mMagneticOS;
+	private BufferedOutputStream mRotationOS;
+	private final SensorManager mSensorManager;
+	private final Sensor mLinearAcc;
+	private final Sensor mMagnetic;
+	private final Sensor mRotation;
+
+	OnClickListener mStartListener = new OnClickListener() {
+
+		@Override
+		public void onClick(final View v) {
+			start();
+		}
+	};
+
+	OnClickListener mStopListener = new OnClickListener() {
+
+		@Override
+		public void onClick(final View v) {
+			stop();
+		}
+	};
+
+	SensorEventListener mLinearAccListener = new SensorEventListener() {
+
+		@Override
+		public void onAccuracyChanged(final Sensor sensor, final int accuracy) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void onSensorChanged(final SensorEvent event) {
+			try {
+				String data = System.currentTimeMillis() + " ";
+				data += event.timestamp + " ";
+				data += event.values[0] + " ";
+				data += event.values[1] + " ";
+				data += event.values[2] + "\n";
+				mLinearAccOS.write(data.getBytes());
+			} catch (final IOException e) {
+				Toast.makeText(mActivity, e.toString(), Toast.LENGTH_LONG)
+						.show();
+			}
+		}
+	};
+
+	SensorEventListener mMagneticListener = new SensorEventListener() {
+
+		@Override
+		public void onAccuracyChanged(final Sensor sensor, final int accuracy) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void onSensorChanged(final SensorEvent event) {
+			try {
+				String data = System.currentTimeMillis() + " ";
+				data += event.timestamp + " ";
+				data += event.values[0] + " ";
+				data += event.values[1] + " ";
+				data += event.values[2] + "\n";
+				mMagneticOS.write(data.getBytes());
+			} catch (final IOException e) {
+				Toast.makeText(mActivity, e.toString(), Toast.LENGTH_LONG)
+						.show();
+			}
+		}
+	};
+
+	SensorEventListener mRotationListener = new SensorEventListener() {
+
+		@Override
+		public void onAccuracyChanged(final Sensor sensor, final int accuracy) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void onSensorChanged(final SensorEvent event) {
+			try {
+				String data = System.currentTimeMillis() + " ";
+				data += event.timestamp + " ";
+				data += event.values[0] + " ";
+				data += event.values[1] + " ";
+				data += event.values[2] + "\n";
+				mRotationOS.write(data.getBytes());
+			} catch (final IOException e) {
+				Toast.makeText(mActivity, e.toString(), Toast.LENGTH_LONG)
+						.show();
+			}
+		}
+	};
+
+	@SuppressLint("InlinedApi")
+	public IMU(final Activity activity) {
+		mActivity = activity;
+
+		mStartButton = (Button) mActivity.findViewById(R.id.start_imu_button);
+		mStopButton = (Button) mActivity.findViewById(R.id.stop_imu_button);
+
+		mStartButton.setOnClickListener(mStartListener);
+		mStopButton.setOnClickListener(mStopListener);
+		mStartButton.setEnabled(!running);
+		mStopButton.setEnabled(running);
+
+		final File sdCard = Environment.getExternalStorageDirectory();
+		mLinearAccDir = new File(sdCard.getAbsolutePath()
+				+ "/Drummer/LinearAcc");
+		mLinearAccDir.mkdirs();
+		mMagneticDir = new File(sdCard.getAbsolutePath() + "/Drummer/Magnetic");
+		mMagneticDir.mkdirs();
+		mRotationDir = new File(sdCard.getAbsolutePath() + "/Drummer/Rotation");
+		mRotationDir.mkdirs();
+
+		mSensorManager = (SensorManager) mActivity
+				.getSystemService(Context.SENSOR_SERVICE);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+			mLinearAcc = mSensorManager
+					.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
+		} else {
+			mLinearAcc = null;
+			Toast.makeText(mActivity, "No Linear Accelerometer",
+					Toast.LENGTH_LONG).show();
+		}
+		mMagnetic = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+		mRotation = mSensorManager
+				.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+	}
+
+	private void start() {
+		running = true;
+
+		mStartButton.setEnabled(!running);
+		mStopButton.setEnabled(running);
+
+		try {
+			final String linearAccFileName = Long.toString(System
+					.currentTimeMillis()) + ".txt";
+			final File linearAccFile = new File(mLinearAccDir,
+					linearAccFileName);
+			mLinearAccOS = new BufferedOutputStream(new FileOutputStream(
+					linearAccFile));
+
+			final String magneticFileName = Long.toString(System
+					.currentTimeMillis()) + ".txt";
+			final File magneticFile = new File(mMagneticDir, magneticFileName);
+			mMagneticOS = new BufferedOutputStream(new FileOutputStream(
+					magneticFile));
+
+			final String rotationFileName = Long.toString(System
+					.currentTimeMillis()) + ".txt";
+			final File rotationFile = new File(mRotationDir, rotationFileName);
+			mRotationOS = new BufferedOutputStream(new FileOutputStream(
+					rotationFile));
+		} catch (final FileNotFoundException e) {
+			Toast.makeText(mActivity, e.toString(), Toast.LENGTH_LONG).show();
+		}
+
+		mSensorManager.registerListener(mLinearAccListener, mLinearAcc,
+				SensorManager.SENSOR_DELAY_FASTEST);
+		mSensorManager.registerListener(mMagneticListener, mMagnetic,
+				SensorManager.SENSOR_DELAY_FASTEST);
+		mSensorManager.registerListener(mRotationListener, mRotation,
+				SensorManager.SENSOR_DELAY_FASTEST);
+	}
+
+	public void stop() {
+		mSensorManager.unregisterListener(mLinearAccListener);
+		mSensorManager.unregisterListener(mMagneticListener);
+		mSensorManager.unregisterListener(mRotationListener);
+
+		try {
+			if (mLinearAccOS != null) {
+				mLinearAccOS.flush();
+				mLinearAccOS.close();
+				mLinearAccOS = null;
+			}
+			if (mMagneticOS != null) {
+				mMagneticOS.flush();
+				mMagneticOS.close();
+				mMagneticOS = null;
+			}
+			if (mRotationOS != null) {
+				mRotationOS.flush();
+				mRotationOS.close();
+				mRotationOS = null;
+			}
+		} catch (final IOException e) {
+			Toast.makeText(mActivity, e.toString(), Toast.LENGTH_LONG).show();
+		}
+
+		running = false;
+
+		mStartButton.setEnabled(!running);
+		mStopButton.setEnabled(running);
+	}
+}
