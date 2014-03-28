@@ -66,7 +66,7 @@ if __name__ == "__main__":
     fs = 44100
 
     filtered_amp = bpfilter.butter_bandpass_filter(
-        amp, lowcut, highcut, fs, order=6)
+        amp, lowcut, highcut, fs, order=9)
 
 
     plt.plot(filtered_amp, 'r', alpha=0.3)
