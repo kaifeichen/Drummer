@@ -26,17 +26,11 @@ public class IMU {
 	private final Button mStopButton;
 	private boolean running = false;
 	private final File mLinearAccDir;
-	private final File mGravityDir;
-	private final File mMagneticDir;
 	private final File mRotationDir;
 	private BufferedOutputStream mLinearAccOS;
-	private BufferedOutputStream mGravityOS;
-	private BufferedOutputStream mMagneticOS;
 	private BufferedOutputStream mRotationOS;
 	private final SensorManager mSensorManager;
 	private final Sensor mLinearAcc;
-	private final Sensor mGravity;
-	private final Sensor mMagnetic;
 	private final Sensor mRotation;
 
 	OnClickListener mStartListener = new OnClickListener() {
@@ -72,54 +66,6 @@ public class IMU {
 				data += event.values[1] + " ";
 				data += event.values[2] + "\n";
 				mLinearAccOS.write(data.getBytes());
-			} catch (final IOException e) {
-				Toast.makeText(mActivity, e.toString(), Toast.LENGTH_LONG)
-						.show();
-			}
-		}
-	};
-
-	SensorEventListener mGravityListener = new SensorEventListener() {
-
-		@Override
-		public void onAccuracyChanged(final Sensor sensor, final int accuracy) {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		public void onSensorChanged(final SensorEvent event) {
-			try {
-				String data = System.currentTimeMillis() + " ";
-				data += event.timestamp + " ";
-				data += event.values[0] + " ";
-				data += event.values[1] + " ";
-				data += event.values[2] + "\n";
-				mGravityOS.write(data.getBytes());
-			} catch (final IOException e) {
-				Toast.makeText(mActivity, e.toString(), Toast.LENGTH_LONG)
-						.show();
-			}
-		}
-	};
-
-	SensorEventListener mMagneticListener = new SensorEventListener() {
-
-		@Override
-		public void onAccuracyChanged(final Sensor sensor, final int accuracy) {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		public void onSensorChanged(final SensorEvent event) {
-			try {
-				String data = System.currentTimeMillis() + " ";
-				data += event.timestamp + " ";
-				data += event.values[0] + " ";
-				data += event.values[1] + " ";
-				data += event.values[2] + "\n";
-				mMagneticOS.write(data.getBytes());
 			} catch (final IOException e) {
 				Toast.makeText(mActivity, e.toString(), Toast.LENGTH_LONG)
 						.show();
@@ -167,10 +113,6 @@ public class IMU {
 		mLinearAccDir = new File(sdCard.getAbsolutePath()
 				+ "/Drummer/LinearAcc");
 		mLinearAccDir.mkdirs();
-		mGravityDir = new File(sdCard.getAbsolutePath() + "/Drummer/Gravity");
-		mGravityDir.mkdirs();
-		mMagneticDir = new File(sdCard.getAbsolutePath() + "/Drummer/Magnetic");
-		mMagneticDir.mkdirs();
 		mRotationDir = new File(sdCard.getAbsolutePath() + "/Drummer/Rotation");
 		mRotationDir.mkdirs();
 
@@ -184,8 +126,6 @@ public class IMU {
 			Toast.makeText(mActivity, "No Linear Accelerometer",
 					Toast.LENGTH_LONG).show();
 		}
-		mGravity = mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);
-		mMagnetic = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 		mRotation = mSensorManager
 				.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
 	}
@@ -204,18 +144,6 @@ public class IMU {
 			mLinearAccOS = new BufferedOutputStream(new FileOutputStream(
 					linearAccFile));
 
-			final String gravityFileName = Long.toString(System
-					.currentTimeMillis()) + ".txt";
-			final File gravityFile = new File(mGravityDir, gravityFileName);
-			mGravityOS = new BufferedOutputStream(new FileOutputStream(
-					gravityFile));
-
-			final String magneticFileName = Long.toString(System
-					.currentTimeMillis()) + ".txt";
-			final File magneticFile = new File(mMagneticDir, magneticFileName);
-			mMagneticOS = new BufferedOutputStream(new FileOutputStream(
-					magneticFile));
-
 			final String rotationFileName = Long.toString(System
 					.currentTimeMillis()) + ".txt";
 			final File rotationFile = new File(mRotationDir, rotationFileName);
@@ -227,18 +155,12 @@ public class IMU {
 
 		mSensorManager.registerListener(mLinearAccListener, mLinearAcc,
 				SensorManager.SENSOR_DELAY_FASTEST);
-		mSensorManager.registerListener(mGravityListener, mGravity,
-				SensorManager.SENSOR_DELAY_FASTEST);
-		mSensorManager.registerListener(mMagneticListener, mMagnetic,
-				SensorManager.SENSOR_DELAY_FASTEST);
 		mSensorManager.registerListener(mRotationListener, mRotation,
 				SensorManager.SENSOR_DELAY_FASTEST);
 	}
 
 	public void stop() {
 		mSensorManager.unregisterListener(mLinearAccListener);
-		mSensorManager.unregisterListener(mGravityListener);
-		mSensorManager.unregisterListener(mMagneticListener);
 		mSensorManager.unregisterListener(mRotationListener);
 
 		try {
@@ -246,16 +168,6 @@ public class IMU {
 				mLinearAccOS.flush();
 				mLinearAccOS.close();
 				mLinearAccOS = null;
-			}
-			if (mGravityOS != null) {
-				mGravityOS.flush();
-				mGravityOS.close();
-				mGravityOS = null;
-			}
-			if (mMagneticOS != null) {
-				mMagneticOS.flush();
-				mMagneticOS.close();
-				mMagneticOS = null;
 			}
 			if (mRotationOS != null) {
 				mRotationOS.flush();
