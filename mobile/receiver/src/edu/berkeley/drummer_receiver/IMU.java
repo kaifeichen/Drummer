@@ -61,6 +61,7 @@ public class IMU {
 		public void onSensorChanged(final SensorEvent event) {
 			try {
 				String data = System.currentTimeMillis() + " ";
+				data += System.nanoTime() + " ";
 				data += event.timestamp + " ";
 				data += event.values[0] + " ";
 				data += event.values[1] + " ";
@@ -85,6 +86,7 @@ public class IMU {
 		public void onSensorChanged(final SensorEvent event) {
 			try {
 				String data = System.currentTimeMillis() + " ";
+				data += System.nanoTime() + " ";
 				data += event.timestamp + " ";
 				data += event.values[0] + " ";
 				data += event.values[1] + " ";
