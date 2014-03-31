@@ -1,4 +1,4 @@
-package edu.berkeley.drummer;
+package edu.berkeley.drummer_sender;
 
 import android.app.Activity;
 import android.media.AudioFormat;
@@ -12,12 +12,13 @@ import android.widget.EditText;
 public class SenderActivity extends Activity implements View.OnClickListener {
 	private AudioSendThread mSendThread;
 	private final int mSampleRate = 44100;
+	private EditText mAmpRatioText;
 	private EditText mStartFreqText;
 	private EditText mStopFreqText;
 	private EditText mDurationText;
 	private Button mSendButton;
 	private final double maxDuration = 100; // in millisecond
-	private final int maxAmp = 32000;
+	private final int maxAmp = 32767;
 
 	private class AudioSendThread extends Thread {
 		private final int mBufSize;
@@ -44,8 +45,10 @@ public class SenderActivity extends Activity implements View.OnClickListener {
 				duration = Double.parseDouble(durationText.toString()) / 1000.0;
 			}
 
+			final int amp = (int) (Double.parseDouble(mAmpRatioText.getText()
+					.toString()) * maxAmp);
 			mSamples = genSamples(duration, mStartFreq, mStopFreq, mBufSize,
-					mSampleRate, maxAmp);
+					mSampleRate, amp);
 		}
 		@Override
 		public void run() {
@@ -61,6 +64,7 @@ public class SenderActivity extends Activity implements View.OnClickListener {
 	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		mAmpRatioText = (EditText) findViewById(R.id.amp_ratio_text);
 		mStartFreqText = (EditText) findViewById(R.id.start_freq_text);
 		mStopFreqText = (EditText) findViewById(R.id.stop_freq_text);
 		mDurationText = (EditText) findViewById(R.id.duration_text);
