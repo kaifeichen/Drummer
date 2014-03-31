@@ -52,21 +52,32 @@ def loc(acclist, quatlist):
     quat_idx = 0
     gacclist = []
     for time, acc in acclist:
+        # look for rotation at each this moment
+        found = False
         while True:
-            if quat_idx < len(quatlist) and time < quatlist[quat_idx][0]:
-                quat_idx -= 1
-                print "FUUUU!"
-            elif quat_idx+1 < len(quatlist) and time >= quatlist[quat_idx+1][0]:
-                quat_idx += 1
+            print quat_idx
+            print len(quatlist)
+            if time < quatlist[quat_idx][0]:
+                if quat_idx > 0:
+                    quat_idx -= 1
+                else:
+                    break
+            elif time >= quatlist[quat_idx+1][0]:
+                if (quat_idx + 1) < (len(quatlist) - 1):
+                    quat_idx += 1
+                else:
+                    break
             else:
+                found = True
                 break
             
-        quat = quatlist[quat_idx][1]
-        w = (1 - quat[0]**2 - quat[1]**2 - quat[2]**2) ** 0.5
-        quat = (w,) + quat
-        r = q2r(quat) # r is the rotation matrix from phone frame to earth frame
-        gacc = numpy.array(r.dot(numpy.matrix(acc).T).T)[0] # make gacc a list of (time in nanosecond, (x, y, z))
-        gacclist.append((time, gacc))
+        if found == True:
+            quat = quatlist[quat_idx][1]
+            w = (1 - quat[0]**2 - quat[1]**2 - quat[2]**2) ** 0.5
+            quat = (w,) + quat
+            r = q2r(quat) # r is the rotation matrix from phone frame to earth frame
+            gacc = numpy.array(r.dot(numpy.matrix(acc).T).T)[0] # make gacc a list of (time in nanosecond, (x, y, z))
+            gacclist.append((time, gacc))
 
     # calculate distance at 3 axises over time
     # velocities
@@ -102,8 +113,8 @@ def readfiles(acc_file_name, quat_file_name):
     quatfile = open(quat_file_name, 'r')
     acctmpstr = [l.split() for l in accfile.readlines()]
     quattmpstr = [l.split() for l in quatfile.readlines()]
-    acclist = [(float(l[1]), (float(l[2]), float(l[3]), float(l[4]))) for l in acctmpstr]
-    quatlist = [(float(l[1]), (float(l[2]), float(l[3]), float(l[4]))) for l in quattmpstr]
+    acclist = [(float(l[2]), (float(l[3]), float(l[4]), float(l[5]))) for l in acctmpstr]
+    quatlist = [(float(l[2]), (float(l[3]), float(l[4]), float(l[5]))) for l in quattmpstr]
 
     return acclist, quatlist
 
