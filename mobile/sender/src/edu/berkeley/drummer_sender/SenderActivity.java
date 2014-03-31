@@ -44,7 +44,7 @@ public class SenderActivity extends Activity implements View.OnClickListener {
 			if (durationText != null && durationText.toString().length() > 0) {
 				duration = Double.parseDouble(durationText.toString()) / 1000.0;
 			}
-
+			System.out.println(mBufSize);
 			final int amp = (int) (Double.parseDouble(mAmpRatioText.getText()
 					.toString()) * maxAmp);
 			mSamples = genSamples(duration, mStartFreq, mStopFreq, mBufSize,
@@ -101,15 +101,22 @@ public class SenderActivity extends Activity implements View.OnClickListener {
 
 		// TODO make this iterate over all timestamps and call function to get
 		// the value
+		
+		short[] array = {0, 38, 77, 83, 35, -61, -165, -209, -141, 39, 259, 400, 350, 82, -311, -635, -685, -360, 245, 857, 1133, 843, 27, -971, -1639, -1545, -594, 850, 2094, 2426, 1512, -359, -2337, -3375, -2777, -617, 2177, 4212, 4303, 2141, -1426, -4696, -5909, -4177, -61, 4558, 7321, 6577, 2338, -3554, -8203, -9068, -5328, 1514, 8206, 11271, 8802, 1597, -7028, -12747, -12384, -5650, 4481, 13063, 15584, 10326, -552, -11864, -17858, -15138, -4559, 8954, 18692, 19486, 10446, -4352, -17690, -22727, -16514, -1679, 14652, 24281, 22061, 8640, -9633, -23718, -26362, -15846, 2959, 20845, 28785, 22509, 4794, -15751, -28882, -27847, -12870, 8816, 26472, 31194, 20423, -670, -21676, -32101, -26638, -7881, 14910, 30401, 30842, 15971, -6837, -26241, -32597, -22779, -1724, 20057, 31756, 27648, 9915, -12515, -28481, -30164, -16940, 4414, 23208, 30203, 22181, 3421, -16580, -27932, -25260, -10254, 9349, 23770, 26074, 15520, -2272, -18311, -24787, -18885, -3986, 12238, 21785, 20269, 8932, -6220, -17598, -19826, -12283, 832, 12819, 17894, 13979, 3509, -8019, -14931, -14156, -6574, 3675, 11431, 13104, 8320, -123, -7860, -11197, -8866, -2455, 4598, 8833, 8447, 4036, -1906, -6376, -7358, -4717, -83, 4115, 5905, 4683, 1358, -2240, -4360, -4156, -1998, 844, 2931, 3360, 2140, 70, -1749, -2487, -1945, -566, 872, 1678, 1568, 740, -296, -1018, -1137, -703, -23, 538, 739, 556, 154, -232, -424, -377, -167, 66, 208, 216, 123, 2, -80, -98, -64, -14, 19};
+
+		
 		for (int j = 0; j < sampleNum; j++) {
 			for (int i = 0; i < buffsize; i++) {
-				samples[j * buffsize + i] = (short) (maxAmp * Math.sin(twopi
-						* startFreq * (Math.pow(k, phase) - 1) / Math.log(k)));
-				phase += 1.0 / sampleRate;
-
 				if ((j == sampleNum - 1) && i > remain - 1) {
 					samples[j * buffsize + i] = (short) 0;
 				}
+				else{
+					samples[j * buffsize + i] = array[j * buffsize + i];
+	//				samples[j * buffsize + i] = (short) (maxAmp * Math.sin(twopi
+	//						* startFreq * (Math.pow(k, phase) - 1) / Math.log(k)));
+					phase += 1.0 / sampleRate;
+				}
+
 			}
 		}
 
