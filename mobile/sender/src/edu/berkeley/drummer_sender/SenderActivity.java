@@ -111,7 +111,7 @@ public class SenderActivity extends Activity implements View.OnClickListener {
 					samples[j * buffsize + i] = (short) 0;
 				}
 				else{
-					samples[j * buffsize + i] = array[j * buffsize + i];
+					samples[j * buffsize + i] = (short) (0.1*array[j * buffsize + i]);
 	//				samples[j * buffsize + i] = (short) (maxAmp * Math.sin(twopi
 	//						* startFreq * (Math.pow(k, phase) - 1) / Math.log(k)));
 					phase += 1.0 / sampleRate;
