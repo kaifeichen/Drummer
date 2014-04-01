@@ -1,50 +1,63 @@
 \section{Introduction}
 \label{sec:intro}
 
+% acoustic signal was used a lot for environment detection
 Audio probing has been used for tens of years in various ways to help indirectly
 inspect environments or objects. Sonar is used by vessels to leverage sound propagation 
 time to detect underwater objects. Ultrasonography uses ultrasound to generate
 diagnostic imaging of subcutaneous body structures in clinics. \fxnote{more use cases}
+Given the physical attributes of audio signal, it is idea for use in environment detection.
+Sound wave is longitudinal mechanical wave, so \fxnote{what?}. 
 
 
-However, as an approach that has been proved to be very useful to interact with 
-physical environment, the acoustic sensors in smartphones gain little attention in 
-industry and 
-have not been evolved as much as other sensors in terms of providing physical information.
-Most acoustic applications is focusing on semantic information in voice, e.g. natural 
-language processing and text-to-speech synthesis. These use cases require only audible
+% acoustic signal should be used for environment detection but not
+With ubiquitous audio devices (e.g.\ microphone and speaker) built in all phones, 
+acoustic signal should also be used for 
+environment detection as an service. Applications including indoor localization, occupancy detection,
+can benefit from the feedback of this service.
+However, acoustic devices in mobile phones gain little attention in 
+industry and have not been evolved as much as other components \cite{invensense, applem7} 
+in terms of providing physical information.
+Most acoustic applications is focusing on semantic information in voice, such as natural 
+language processing and text-to-speech synthesis. These areas require only audible
 sounds with adequate 
 accuracy, and have good baseline proof of feasibility that human brain can process it. 
-\fxnote{cite papers in http://www.cs.virginia.edu/~smn8z/paper/auditeur-mobisys2013.pdf}
+\cite{nirjon2013auditeur}
 Whereas smart phones haven't made the step to evolve from a phone to a smart 
-mobile device that could converts physical information into cyber world. 
-Most phones do audible sound specific optimizations in operating systems or 
-hardware firmwares, and provide no access to the raw audio data. Specifically, most phone
-do audio noise cancellation, which makes it impossible to record the sound sent by itself.
+mobile device that could converts physical information into cyber world using acoustic signal. 
+Worse still, most phones do audible sound specific optimizations in operating systems or 
+hardware firmware, and provide no access to the raw audio data. Specifically, mobile phone
+tend to audio noise cancellation for communication and entertainment quality, which makes 
+it impossible to record the sound sent by itself in application layer.
 
 
-Some recent work has been done on gesture detection based on their influence on sound 
-\fxnote{cite UW and CMU Doppler}. 
+% current work on audio probing 
+In spite of these impediments, several recent work has been done on inferring physical world 
+information using acoustic signal feature. Examples include: gesture detection using Doppler effect
+\cite{gupta2012soundwave, sun2013spartacus}, room shape reconstruction using echo \cite{dokmanic2013acoustic}, 
+blah
+ \fxnote{details about those work}
 
-Moreover, 
-as an ubiquitous sensor, acoustic signals also have been investigated a lot as 
-an input to infer physical world. As examples, Doppler effect is ideal input to 
-gestures inference \cite{gupta2012soundwave, sun2013spartacus}.
 
-
-With initial specific purpose for audible sound playing and recording, microphone 
-and speaker on commercial phones has limitation on sampling frequency and accuracy. 
-Unlike emerging and rapidly evolving heterogeneous sensors and processors in 
-smart phones \cite{invensense, applem7}, acoustic sensors suffer from lacking of 
-applications, which in turn impair the interest from industry to improve and reduce
-cost of better quality acoustic sensors.
+% our work
+In this paper, we introduce {\em Drummer} - a mobile could service to enable several environment awareness 
+features using acoustic signal. \fxnote{goal, arch, algorithm}
 
 
 
+% summary
+In summary, our contributions are:
+
+\begin{itemize}
+
+\item Propose several environment detection features and their algorithms.
+
+\item Investigate how good we can get for each feature, and advocate industry to enable more raw information
+from hardware layer, and expand the functionality of audio devices, such as maximum sending and sampling frequency.
+\end{itemize}
 
 
-In this paper, we introduce several environment features we explored and discuss how 
-they can provide great information to different mobile applications. 
+% roadmap
 
 
 % To learn the environment, computer vision techniques has been proposed to capture 
@@ -67,16 +80,16 @@ they can provide great information to different mobile applications.
 %Standing in front of projection screen implies she/he is presenting, 
 
 
-We propose to use acoustic echo to probe the environment, and build coarse 3D model 
-of the environment. Microphones and speakers are available on almost all phones, 
-which makes crowd-sourcing possible. And 
-sensing the echo of a sound pulse will bring up almost no privacy concerns. We are 
-trying to look at how accurate we can achieve to reconstruct 3D in-room model, and 
-how much benefits we can introduce to existing techniques.
+% We propose to use acoustic echo to probe the environment, and build coarse 3D model 
+% of the environment. Microphones and speakers are available on almost all phones, 
+% which makes crowd-sourcing possible. And 
+% sensing the echo of a sound pulse will bring up almost no privacy concerns. We are 
+% trying to look at how accurate we can achieve to reconstruct 3D in-room model, and 
+% how much benefits we can introduce to existing techniques.
 
 
-3D modeling/inroom localization
+% 3D modeling/inroom localization
 
-We only focus on closed environment
+% We only focus on closed environment
 
-Video: Privacy, Energy Consumption, Computation, Availability
+% Video: Privacy, Energy Consumption, Computation, Availability
