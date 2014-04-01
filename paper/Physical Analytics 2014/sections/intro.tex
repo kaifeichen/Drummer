@@ -1,16 +1,51 @@
 \section{Introduction}
 \label{sec:intro}
 
-Audio probing has been used for tens of years in various ways to inspect 
-environment and objects that cannot be seen directly. Sonar is used by vessels 
-to leverage sound propagation 
+Audio probing has been used for tens of years in various ways to help indirectly
+inspect environments or objects. Sonar is used by vessels to leverage sound propagation 
 time to detect underwater objects. Ultrasonography uses ultrasound to generate
-diagnostic imaging of subcutaneous body structures in clinics. Moreover, 
+diagnostic imaging of subcutaneous body structures in clinics. \fxnote{more use cases}
+
+
+However, as an approach that has been proved to be very useful to interact with 
+physical environment, the acoustic sensors in smartphones gain little attention in 
+industry and 
+have not been evolved as much as other sensors in terms of providing physical information.
+Most acoustic applications is focusing on semantic information in voice, e.g. natural 
+language processing and text-to-speech synthesis. These use cases require only audible
+sounds with adequate 
+accuracy, and have good baseline proof of feasibility that human brain can process it. 
+\fxnote{cite papers in http://www.cs.virginia.edu/~smn8z/paper/auditeur-mobisys2013.pdf}
+Whereas smart phones haven't made the step to evolve from a phone to a smart 
+mobile device that could converts physical information into cyber world. 
+Most phones do audible sound specific optimizations in operating systems or 
+hardware firmwares, and provide no access to the raw audio data. Specifically, most phone
+do audio noise cancellation, which makes it impossible to record the sound sent by itself.
+
+
+Some recent work has been done on gesture detection based on their influence on sound 
+\fxnote{cite UW and CMU Doppler}. 
+
+Moreover, 
 as an ubiquitous sensor, acoustic signals also have been investigated a lot as 
-an input to infer our physical world. 
+an input to infer physical world. As examples, Doppler effect is ideal input to 
+gestures inference \cite{gupta2012soundwave, sun2013spartacus}.
 
 
-s
+With initial specific purpose for audible sound playing and recording, microphone 
+and speaker on commercial phones has limitation on sampling frequency and accuracy. 
+Unlike emerging and rapidly evolving heterogeneous sensors and processors in 
+smart phones \cite{invensense, applem7}, acoustic sensors suffer from lacking of 
+applications, which in turn impair the interest from industry to improve and reduce
+cost of better quality acoustic sensors.
+
+
+
+
+
+In this paper, we introduce several environment features we explored and discuss how 
+they can provide great information to different mobile applications. 
+
 
 % To learn the environment, computer vision techniques has been proposed to capture 
 % and reconstruct things from video and images, such as objects 
