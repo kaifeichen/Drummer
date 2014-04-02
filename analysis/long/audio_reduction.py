@@ -19,7 +19,7 @@ def reduction(data, startf=5000.0, endf=5100.0, length=3.0):
             break
         counter += 1
     amp = max(results_amp)
-    index_rec = results_amp.index(amp)
+    index_rec = data.index(amp)
     points = creat_signal.signal(0.0, amp)
     index_ori = points.index(max(points))
     index_start = index_rec - index_ori
