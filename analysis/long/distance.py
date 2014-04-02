@@ -69,17 +69,21 @@ if __name__ == "__main__":
         amp, lowcut, highcut, fs, order=9)
 
 
-    plt.plot(filtered_amp, 'r', alpha=0.3)
-    
+    # plt.plot(filtered_amp, 'r', alpha=0.3)
+    # plt.show()
 
     reduced_amp = audio_reduction.reduction(
         filtered_amp, lowfreq, highfreq, duration)
 
-    plt.plot(reduced_amp, 'r', alpha=0.3)
-    plt.show()
+    # plt.plot(reduced_amp, 'b', alpha=0.3)
+    
 
     time = float(find_distance(reduced_amp)) / 44100 * 340 / 2 
     print time
+    # print reduced_amp
+    # print filtered_amp
 
-    # plt.plot(reduced_amp, 'r', alpha=0.3)
+    plt.plot(reduced_amp, 'r', alpha=0.3)
+    plt.show()
+    
     # plt.savefig(args.png)

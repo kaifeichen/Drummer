@@ -3,44 +3,54 @@ import math
 import numpy as np
 import scipy as sp
 import struct
+import creat_signal
 import matplotlib.pyplot as plt
 from scipy import optimize
 TIME = 1.0 / 44100
 
 
 def reduction(data, startf=5000.0, endf=5100.0, length=3.0):
-    results = []
+    results_amp = []
     counter = 0
-
     for elem in data:
         if elem > 10000:
             for i in range(int(length / TIME)):
-                results.append(data[counter + i])
+                results_amp.append(data[counter + i])
             break
         counter += 1
-    amp = max(results[:30])
+    amp = max(results_amp)
+    index_rec = results_amp.index(amp)
+    points = creat_signal.signal(0.0, amp)
+    index_ori = points.index(max(points))
+    index_start = index_rec - index_ori
+
+    results = []
+    for k in range(int(length / TIME)):
+        results.append(data[index_start + k])
+
     value = float("inf")
     starttime = 0
+    final_points = []
     for j in range(640):
         start = j * TIME / 80.0
         origin = []
         error = 0
-        for i in range(30):
-            error += abs(results[i] -
-                         chirp_func(start + i * TIME, amp, startf, endf, length))
+        points = creat_signal.signal(start, amp)
+        for i in range(20):
+            error += abs(results[i] - points[i])
         if (error < value):
             starttime = start
             value = error
+            final_points = points
 
     num = 0
     plot1 = []
     now_array = []
     past_array = []
     while (num < len(data)):
-        if (num >= counter and num < counter + len(results)):
+        if (num >= index_start and num < index_start + len(results)):
             now = data[num]
-            past = chirp_func(starttime + TIME * (num - counter),
-                            amp, startf, endf, length)
+            past = final_points[num]
             plot1.append(now - past)
             past_array.append(past)
             now_array.append(now)
