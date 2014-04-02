@@ -19,10 +19,12 @@ def reduction(data, startf=5000.0, endf=5100.0, length=3.0):
             break
         counter += 1
     amp = max(results_amp)
-    index_rec = data.index(amp)
+    index_rec = list(data).index(amp)
     points = creat_signal.signal(0.0, amp)
     index_ori = points.index(max(points))
     index_start = index_rec - index_ori
+    print index_start
+    print index_rec
 
     results = []
     for k in range(int(length / TIME)):
@@ -50,7 +52,7 @@ def reduction(data, startf=5000.0, endf=5100.0, length=3.0):
     while (num < len(data)):
         if (num >= index_start and num < index_start + len(results)):
             now = data[num]
-            past = final_points[num]
+            past = final_points[num-index_start]
             plot1.append(now - past)
             past_array.append(past)
             now_array.append(now)
