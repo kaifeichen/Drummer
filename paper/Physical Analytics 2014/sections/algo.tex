@@ -3,10 +3,12 @@
 
 
 
-\subsection{Distance to Nearest Wall}
-\subsubsection{Feature Desciption}
+\subsection{Distance from Nearest Walls}
 
-\subsubsection{Mechanism}
+Geometric information can be botained from measuring Round Trip Time (RTT)
+of a probing chirp. 
+
+\subsubsection{Chirp}
 
 
 sweep frequency chirp
@@ -36,8 +38,9 @@ SNR etc.
 
 \fxnote{GRAPH: chirp and echo shape}
 
+\subsubsection{Recording}
 
-\subsection{Auto-correlation and Audio Reduction}
+\subsubsection{Cross-correlation and Audio Reduction}
 
 After receiving the original sound and echo, we do auto-correlation with original sound,
 and remove it from the audio track.
@@ -45,51 +48,59 @@ and remove it from the audio track.
 \fxnote{GRAPH: how auto-correlation works}
 
 
-\subsubsection{Determine Envelops}
+\subsubsection{Locating Echoes}
 
-Envelop is the sound of big surface. Physical expalination. 
+Envelop is the sound of big surface. Physical explanation. 
 Define envelop as the same duration of original sound.
+
+
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.45\textwidth]{./fig/40cm.pdf}
-\caption{System Architecture of Drummer}
+\includegraphics[width=0.45\textwidth]{./fig/20cm.eps}
+\caption{20cm from wall, 50ms chirp}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.45\textwidth]{./fig/40cm.eps}
+\caption{40cm from wall, 50ms chirp}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.45\textwidth]{./fig/inroom.pdf}
-\caption{System Architecture of Drummer}
+\caption{40cm from wall, 5ms chirp}
 \end{figure}
 
 
 
-\subsubsection{Phase Diff}
+% \subsubsection{Phase Diff}
 
 
 
-\subsubsection{Shape of Echo}
+% \subsubsection{Shape of Echo}
 
 
-\fxnote{GRAPH: envelop shapes}
+% \subsubsection{Iterative Audio Reduction}
 
-\subsubsection{Iterative Audio Reduction}
-
-We remove the acoustic effects of an object after determining its existence, and 
-in turn investigate the remaining sound iteratively. 
+% We remove the acoustic effects of an object after determining its existence, and 
+% in turn investigate the remaining sound iteratively. 
 
 
-\subsubsection{Determine Direction of Each Object}
+\subsection{Orientations of All Echoes}
 
-We use accelerometer to measure movements, and redo probing several time, and 
-use TDoA of envelops to determine the direction of the object represented by the envelop.
+We use TDoA of envelops to different microphones to determine the direction 
+of the object represented by the envelop.
 
 
 Binaural beat
 
 
-\subsection{Sudden Change of Enclosing Physical Environment}
+\subsection{Environment Transition Detection}
 
-\subsubsection{Feature Desciption}
 
-\subsubsection{Mechanism}
+The pattern of echoes will have a sudden change when walking through a door or corner.
+
+\subsubsection{Spatial Environment Pattern}
+
