@@ -15,16 +15,10 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.Environment;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
 import android.widget.Toast;
 
 public class IMU {
 	private final Activity mActivity;
-	private final Button mStartButton;
-	private final Button mStopButton;
-	private boolean running = false;
 	private final File mLinearAccDir;
 	private final File mRotationDir;
 	private BufferedOutputStream mLinearAccOS;
@@ -33,23 +27,7 @@ public class IMU {
 	private final Sensor mLinearAcc;
 	private final Sensor mRotation;
 
-	OnClickListener mStartListener = new OnClickListener() {
-
-		@Override
-		public void onClick(final View v) {
-			start();
-		}
-	};
-
-	OnClickListener mStopListener = new OnClickListener() {
-
-		@Override
-		public void onClick(final View v) {
-			stop();
-		}
-	};
-
-	SensorEventListener mLinearAccListener = new SensorEventListener() {
+	private final SensorEventListener mLinearAccListener = new SensorEventListener() {
 
 		@Override
 		public void onAccuracyChanged(final Sensor sensor, final int accuracy) {
@@ -74,7 +52,7 @@ public class IMU {
 		}
 	};
 
-	SensorEventListener mRotationListener = new SensorEventListener() {
+	private final SensorEventListener mRotationListener = new SensorEventListener() {
 
 		@Override
 		public void onAccuracyChanged(final Sensor sensor, final int accuracy) {
@@ -103,14 +81,6 @@ public class IMU {
 	public IMU(final Activity activity) {
 		mActivity = activity;
 
-		mStartButton = (Button) mActivity.findViewById(R.id.start_imu_button);
-		mStopButton = (Button) mActivity.findViewById(R.id.stop_imu_button);
-
-		mStartButton.setOnClickListener(mStartListener);
-		mStopButton.setOnClickListener(mStopListener);
-		mStartButton.setEnabled(!running);
-		mStopButton.setEnabled(running);
-
 		final File sdCard = Environment.getExternalStorageDirectory();
 		mLinearAccDir = new File(sdCard.getAbsolutePath()
 				+ "/Drummer/LinearAcc");
@@ -132,12 +102,7 @@ public class IMU {
 				.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
 	}
 
-	private void start() {
-		running = true;
-
-		mStartButton.setEnabled(!running);
-		mStopButton.setEnabled(running);
-
+	public void start() {
 		try {
 			final String linearAccFileName = Long.toString(System
 					.currentTimeMillis()) + ".txt";
@@ -179,10 +144,5 @@ public class IMU {
 		} catch (final IOException e) {
 			Toast.makeText(mActivity, e.toString(), Toast.LENGTH_LONG).show();
 		}
-
-		running = false;
-
-		mStartButton.setEnabled(!running);
-		mStopButton.setEnabled(running);
 	}
 }

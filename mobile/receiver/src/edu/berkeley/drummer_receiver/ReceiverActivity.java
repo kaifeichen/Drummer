@@ -11,17 +11,16 @@ import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.EditText;
 
-public class ReceiverActivity extends Activity implements View.OnClickListener {
+public class ReceiverActivity extends Activity {
+	private boolean mRunning = false;
 	private AudioRecordThread mRecordThread;
 	private final int mSampleRate = 44100;
-	private EditText mDurationText;
-	private Button mRecvButton;
-	private Handler mHandler;
+	private Button mStartButton;
+	private Button mStopButton;
 	private IMU mIMU;
 
 	private class AudioRecordThread extends Thread {
@@ -57,7 +56,7 @@ public class ReceiverActivity extends Activity implements View.OnClickListener {
 
 		@Override
 		public void run() {
-			// setPriority(Thread.MAX_PRIORITY);
+			setPriority(Thread.MAX_PRIORITY);
 			try {
 				mRecorder.startRecording();
 				while (mRun == true) {
@@ -76,19 +75,40 @@ public class ReceiverActivity extends Activity implements View.OnClickListener {
 				e.printStackTrace();
 			}
 		}
+
 		public void terminate() {
 			mRun = false;
 		}
 	}
 
+	private final OnClickListener mStartListener = new OnClickListener() {
+
+		@Override
+		public void onClick(final View v) {
+			start();
+		}
+	};
+
+	private final OnClickListener mStopListener = new OnClickListener() {
+
+		@Override
+		public void onClick(final View v) {
+			stop();
+		}
+	};
+
 	@Override
 	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		mRecvButton = (Button) findViewById(R.id.recv_button);
-		mDurationText = (EditText) findViewById(R.id.recv_duration_text);
-		mHandler = new Handler();
-		mRecvButton.setOnClickListener(this);
+		mStartButton = (Button) this.findViewById(R.id.start_imu_button);
+		mStopButton = (Button) this.findViewById(R.id.stop_imu_button);
+
+		mStartButton.setOnClickListener(mStartListener);
+		mStopButton.setOnClickListener(mStopListener);
+
+		mStartButton.setEnabled(true);
+		mStopButton.setEnabled(false);
 
 		// This will get the SD Card directory and create a folder named
 		// Drummer in it.
@@ -101,21 +121,26 @@ public class ReceiverActivity extends Activity implements View.OnClickListener {
 
 	@Override
 	public void onPause() {
-		mIMU.stop();
-		if (mRecordThread != null) {
-			mRecordThread.terminate();
-			try {
-				mRecordThread.join();
-			} catch (final InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
+		stop();
 		super.onPause();
 	}
 
-	private final Runnable mPauseTask = new Runnable() {
-		@Override
-		public void run() {
+	private void start() {
+		mStartButton.setEnabled(false);
+		mStopButton.setEnabled(true);
+
+		mRunning = false;
+
+		mRecordThread = new AudioRecordThread();
+		mRecordThread.start();
+
+		mIMU.start();
+	}
+
+	public void stop() {
+		if (mRunning == true) {
+			mIMU.stop();
+
 			mRecordThread.terminate();
 			try {
 				mRecordThread.join();
@@ -124,20 +149,11 @@ public class ReceiverActivity extends Activity implements View.OnClickListener {
 				e.printStackTrace();
 			}
 			mRecordThread = null;
-			mHandler.removeCallbacks(mPauseTask);
-			mRecvButton.setEnabled(true);
+
+			mRunning = true;
+
+			mStartButton.setEnabled(true);
+			mStopButton.setEnabled(false);
 		}
-	};
-
-	@Override
-	public void onClick(final View v) {
-		mRecvButton.setEnabled(false);
-		mRecordThread = new AudioRecordThread();
-
-		final long recvDuration = Long.parseLong(mDurationText.getText()
-				.toString());
-
-		mRecordThread.start();
-		mHandler.postDelayed(mPauseTask, recvDuration);
 	}
 }
