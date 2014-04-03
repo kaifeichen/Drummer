@@ -22,7 +22,7 @@ def reduction(data, startf=5000.0, endf=5100.0, length=3.0):
     index_rec = list(data).index(amp)
     points = creat_signal.signal(0.0, amp)
     index_ori = points.index(max(points))
-    index_start = index_rec - index_ori
+    index_start = index_rec - index_ori-10
     print index_start
     print index_rec
 
