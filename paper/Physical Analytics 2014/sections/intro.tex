@@ -1,6 +1,12 @@
 \section{Introduction}
 \label{sec:intro}
 
+\fxnote{if not many applications can be found. 
+change to: calibration information is important for indoor localization, people are 
+using different ways to do that, sound is one way that is better .}
+
+
+
 % acoustic signal was used a lot for environment detection
 Audio probing has been used for tens of years in various ways to help indirectly
 inspect environments or objects. Sonar is used by vessels to leverage sound propagation 
@@ -14,15 +20,15 @@ Sound wave is longitudinal mechanical wave, so \fxnote{what?}.
 With ubiquitous audio devices (e.g.\ microphone and speaker) built in all phones, 
 acoustic signal should also be used for 
 environment detection as an service. Applications including indoor localization, occupancy detection,
-can benefit from the feedback of this service.
+and 3D model reconstruction, can benefit from the feedback of this service.
 However, acoustic devices in mobile phones gain little attention in 
 industry and have not been evolved as much as other components \cite{invensense, applem7} 
 in terms of providing physical information.
 Most acoustic applications is focusing on semantic information in voice, such as natural 
 language processing and text-to-speech synthesis. These areas require only audible
 sounds with adequate 
-accuracy, and have good baseline proof of feasibility that human brain can process it. 
-\cite{nirjon2013auditeur}
+accuracy, and have good baseline proof of feasibility that human brain can process it
+\cite{nirjon2013auditeur}.
 Whereas smart phones haven't made the step to evolve from a phone to a smart 
 mobile device that could converts physical information into cyber world using acoustic signal. 
 Worse still, most phones do audible sound specific optimizations in operating systems or 
@@ -52,8 +58,10 @@ In summary, our contributions are:
 
 \item Propose several environment detection features and their algorithms.
 
-\item Investigate how good we can get for each feature, and advocate industry to enable more raw information
-from hardware layer, and expand the functionality of audio devices, such as maximum sending and sampling frequency.
+\item Investigate how good we can get for each feature, and advocate industry to enable 
+more raw information from hardware layer, and expand the functionality of audio devices, 
+such as maximum sending and sampling frequency.
+
 \end{itemize}
 
 
