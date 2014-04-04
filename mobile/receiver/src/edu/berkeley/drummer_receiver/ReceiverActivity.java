@@ -4,6 +4,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 
 import android.app.Activity;
 import android.media.AudioFormat;
@@ -14,9 +15,12 @@ import android.os.Environment;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.Toast;
 
 public class ReceiverActivity extends Activity {
 	private boolean mRunning = false;
+	private File mAudioDir;
+	private BufferedOutputStream mAudioOS;
 	private AudioRecordThread mRecordThread;
 	private final int mSampleRate = 44100;
 	private Button mStartButton;
@@ -26,25 +30,9 @@ public class ReceiverActivity extends Activity {
 	private class AudioRecordThread extends Thread {
 		private volatile boolean mRun = true;
 		private final AudioRecord mRecorder;
-		private BufferedOutputStream mOutStream;
 		private final int mBufSize;
 
 		public AudioRecordThread() {
-			final File sdCard = Environment.getExternalStorageDirectory();
-			final File directory = new File(sdCard.getAbsolutePath()
-					+ "/Drummer");
-			final String fileName = Long.toString(System.currentTimeMillis())
-					+ ".dat";
-			final File file = new File(directory, fileName);
-
-			try {
-				mOutStream = new BufferedOutputStream(
-						new FileOutputStream(file));
-			} catch (final FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
 			// TODO buffsize and mRecorder should be created in onCreate
 			mBufSize = AudioRecord
 					.getMinBufferSize(mSampleRate, AudioFormat.CHANNEL_IN_MONO,
@@ -65,10 +53,8 @@ public class ReceiverActivity extends Activity {
 					// buffer.length bytes are recorded
 					mRecorder.read(buffer, 0, buffer.length); // Bytes
 					System.out.print(buffer);
-					mOutStream.write(buffer);
+					mAudioOS.write(buffer);
 				}
-				mOutStream.flush();
-				mOutStream.close();
 				mRecorder.stop();
 				mRecorder.release();
 			} catch (final Exception e) {
@@ -113,8 +99,8 @@ public class ReceiverActivity extends Activity {
 		// This will get the SD Card directory and create a folder named
 		// Drummer in it.
 		final File sdCard = Environment.getExternalStorageDirectory();
-		final File directory = new File(sdCard.getAbsolutePath() + "/Drummer");
-		directory.mkdirs();
+		mAudioDir = new File(sdCard.getAbsolutePath() + "/Drummer/Audio");
+		mAudioDir.mkdirs();
 
 		mIMU = new IMU(this);
 	}
@@ -129,7 +115,17 @@ public class ReceiverActivity extends Activity {
 		mStartButton.setEnabled(false);
 		mStopButton.setEnabled(true);
 
-		mRunning = false;
+		mRunning = true;
+
+		try {
+			final String audioFileName = Long.toString(System
+					.currentTimeMillis()) + ".txt";
+			final File linearAccFile = new File(mAudioDir, audioFileName);
+			mAudioOS = new BufferedOutputStream(new FileOutputStream(
+					linearAccFile));
+		} catch (final FileNotFoundException e) {
+			Toast.makeText(this, e.toString(), Toast.LENGTH_LONG).show();
+		}
 
 		mRecordThread = new AudioRecordThread();
 		mRecordThread.start();
@@ -150,7 +146,17 @@ public class ReceiverActivity extends Activity {
 			}
 			mRecordThread = null;
 
-			mRunning = true;
+			try {
+				if (mAudioOS != null) {
+					mAudioOS.flush();
+					mAudioOS.close();
+					mAudioOS = null;
+				}
+			} catch (final IOException e) {
+				Toast.makeText(this, e.toString(), Toast.LENGTH_LONG).show();
+			}
+
+			mRunning = false;
 
 			mStartButton.setEnabled(true);
 			mStopButton.setEnabled(false);
