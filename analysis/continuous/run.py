@@ -12,9 +12,8 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 
 
-chirp_amp_thld = 20000
 chirp_echo_duration = 0.030 # in second
-max_amp_change = 10000
+
 
 def read_data(fname):
     f = open(fname, 'rb')
@@ -23,7 +22,7 @@ def read_data(fname):
     return amp
 
 
-def plot_probe(enve_amps, duration, fs, create_video = False, plot_changes = False):
+def plot_probe(enve_amps, duration, fs, ampthld, create_video = False, plot_changes = False):
     maxtab, mintab = peakdet(enve_amps, 100)
 
     if create_video == True:
@@ -78,7 +77,7 @@ def plot_probe(enve_amps, duration, fs, create_video = False, plot_changes = Fal
         last_amps = []
 
         for sample_idx, amp in maxtab:
-            if amp > chirp_amp_thld:
+            if amp > ampthld:
                 start_idx = int(sample_idx - (duration / 2) * fs)
                 stop_idx = start_idx + echo_len
    
@@ -102,7 +101,7 @@ def plot_probe(enve_amps, duration, fs, create_video = False, plot_changes = Fal
 
         fig = plt.figure()
         ax = fig.gca()
-        surf = ax.pcolor(chirp_times, echo_times, numpy.abs(changes), cmap=cm.coolwarm, linewidth=0, vmin=0, vmax=max_amp_change)
+        surf = ax.pcolor(chirp_times, echo_times, numpy.abs(changes), cmap=cm.coolwarm, linewidth=0)
         plt.axis([chirp_times.min(), chirp_times.max(), echo_times.min(), echo_times.max()])
 
         xtickitvl = 2 #second
@@ -128,6 +127,7 @@ if __name__ == "__main__":
     ap.add_argument('-s', '--startfreq', type=int, help="start frequency (Hz)")
     ap.add_argument('-e', '--endfreq', type=int, help="end frequency (Hz)")
     ap.add_argument('-d', '--duration', type=float, help="duration (second)")
+    ap.add_argument('-a', '--ampthld', type=float, help="amplitude threadhold")
     ap.add_argument('-v', '--video', action='store_true', help="create video")
     ap.add_argument('-c', '--changeplot', action='store_true', help="plot changes")
 
@@ -135,6 +135,7 @@ if __name__ == "__main__":
     lowfreq = args.startfreq
     highfreq = args.endfreq
     duration = args.duration
+    ampthld = args.ampthld
     video = args.video
     changeplot = args.changeplot
 
@@ -149,7 +150,7 @@ if __name__ == "__main__":
         amps, lowcut, highcut, fs, order=9)
 
     enve_amps = numpy.abs(signal.hilbert(filtered_amps))
-    plot_probe(enve_amps, duration, fs, create_video=video, plot_changes=changeplot)
+    plot_probe(enve_amps, duration, fs, ampthld, create_video=video, plot_changes=changeplot)
     # plt.plot(enve_amps)
     # plt.show()
     
