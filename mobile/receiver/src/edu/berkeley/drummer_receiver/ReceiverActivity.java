@@ -20,11 +20,15 @@ import android.widget.Toast;
 public class ReceiverActivity extends Activity {
 	private boolean mRunning = false;
 	private File mAudioDir;
+	private File mReportDir;
 	private BufferedOutputStream mAudioOS;
+	private BufferedOutputStream mReportOS;
 	private AudioRecordThread mRecordThread;
 	private final int mSampleRate = 44100;
 	private Button mStartButton;
 	private Button mStopButton;
+	private Button mReportDoorButton;
+	private Button mReportCornerButton;
 	private IMU mIMU;
 
 	private class AudioRecordThread extends Thread {
@@ -83,28 +87,61 @@ public class ReceiverActivity extends Activity {
 		}
 	};
 
+	private final OnClickListener mReportListener = new OnClickListener() {
+
+		@Override
+		public void onClick(final View v) {
+			final int buttonId = v.getId();
+			try {
+				String data;
+				if (buttonId == R.id.report_door_button) {
+					data = System.currentTimeMillis() + " ";
+					data += System.nanoTime() + " ";
+					data += "Door\n";
+					mReportOS.write(data.getBytes());
+				} else if (buttonId == R.id.report_corner_button) {
+					data = System.currentTimeMillis() + " ";
+					data += System.nanoTime() + " ";
+					data += "Corner\n";
+					mReportOS.write(data.getBytes());
+				}
+			} catch (final IOException e) {
+				Toast.makeText(ReceiverActivity.this, e.toString(),
+						Toast.LENGTH_LONG).show();
+			}
+		}
+	};
+
 	@Override
 	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		mStartButton = (Button) this.findViewById(R.id.start_imu_button);
 		mStopButton = (Button) this.findViewById(R.id.stop_imu_button);
+		mReportDoorButton = (Button) this.findViewById(R.id.report_door_button);
+		mReportCornerButton = (Button) this
+				.findViewById(R.id.report_corner_button);
 
 		mStartButton.setOnClickListener(mStartListener);
 		mStopButton.setOnClickListener(mStopListener);
+		mReportDoorButton.setOnClickListener(mReportListener);
+		mReportCornerButton.setOnClickListener(mReportListener);
 
 		mStartButton.setEnabled(true);
 		mStopButton.setEnabled(false);
+		mReportDoorButton.setEnabled(false);
+		mReportCornerButton.setEnabled(false);
 
 		// This will get the SD Card directory and create a folder named
 		// Drummer in it.
 		final File sdCard = Environment.getExternalStorageDirectory();
 		mAudioDir = new File(sdCard.getAbsolutePath() + "/Drummer/Audio");
 		mAudioDir.mkdirs();
+		mReportDir = new File(sdCard.getAbsolutePath() + "/Drummer/Report");
+		mReportDir.mkdirs();
 
 		mIMU = new IMU(this);
 	}
-
 	@Override
 	public void onPause() {
 		stop();
@@ -114,15 +151,22 @@ public class ReceiverActivity extends Activity {
 	private void start() {
 		mStartButton.setEnabled(false);
 		mStopButton.setEnabled(true);
+		mReportDoorButton.setEnabled(true);
+		mReportCornerButton.setEnabled(true);
 
 		mRunning = true;
 
 		try {
 			final String audioFileName = Long.toString(System
 					.currentTimeMillis()) + ".txt";
-			final File linearAccFile = new File(mAudioDir, audioFileName);
-			mAudioOS = new BufferedOutputStream(new FileOutputStream(
-					linearAccFile));
+			final File audioFile = new File(mAudioDir, audioFileName);
+			mAudioOS = new BufferedOutputStream(new FileOutputStream(audioFile));
+
+			final String reportFileName = Long.toString(System
+					.currentTimeMillis()) + ".txt";
+			final File reportFile = new File(mReportDir, reportFileName);
+			mReportOS = new BufferedOutputStream(new FileOutputStream(
+					reportFile));
 		} catch (final FileNotFoundException e) {
 			Toast.makeText(this, e.toString(), Toast.LENGTH_LONG).show();
 		}
@@ -152,6 +196,11 @@ public class ReceiverActivity extends Activity {
 					mAudioOS.close();
 					mAudioOS = null;
 				}
+				if (mReportOS != null) {
+					mReportOS.flush();
+					mReportOS.close();
+					mReportOS = null;
+				}
 			} catch (final IOException e) {
 				Toast.makeText(this, e.toString(), Toast.LENGTH_LONG).show();
 			}
@@ -160,6 +209,8 @@ public class ReceiverActivity extends Activity {
 
 			mStartButton.setEnabled(true);
 			mStopButton.setEnabled(false);
+			mReportDoorButton.setEnabled(false);
+			mReportCornerButton.setEnabled(false);
 		}
 	}
 }
