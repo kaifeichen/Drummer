@@ -215,6 +215,10 @@ _build
 *.db
 *.csv
 *.dat
+*.png
+*.mp4
+*.txt
+*.MOV
 
 # Twisted Log Files
 *.log
@@ -228,8 +232,6 @@ _build
 *.graffle
 zentus-sqlite-license.txt
 
-#Octave
-octave-workspace
 
 #paper related files
 #!/paper/relwork/*.pdf
