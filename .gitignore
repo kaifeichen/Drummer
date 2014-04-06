@@ -239,3 +239,4 @@ octave-workspace
 #!/paper/relwork/*.pdf
 !/paper/Physical Analytics 2014/fig/*.pdf
 !/paper/Physical Analytics 2014/fig/*.eps
+!/paper/Physical Analytics 2014/fig/*.png
