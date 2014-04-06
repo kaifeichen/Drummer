@@ -9,7 +9,7 @@ from scipy import optimize
 TIME = 1.0 / 44100
 
 
-def reduction(data, startf=5000.0, endf=5100.0, length=3.0):
+def substract(data, signal_func):
     results_amp = []
     counter = 0
     for elem in data:
@@ -60,12 +60,3 @@ def reduction(data, startf=5000.0, endf=5100.0, length=3.0):
             plot1.append(data[num])
         num += 1
     return np.array(now_array) - np.array(past_array)
-
-
-def chirp_func(t, a, start_fr, end_fr, length):
-    k = math.pow(float(end_fr) / start_fr, 1.0 / length)
-    den = math.log(k)
-    num = math.pow(k, t) - 1
-    rest = math.pi * 2 * start_fr
-    result = math.sin(1.0 * num * rest / den)
-    return a * result
