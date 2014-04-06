@@ -28,7 +28,7 @@
             android:text="0.5" >
         </EditText>
     </LinearLayout>
-    
+
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -47,7 +47,7 @@
             android:text="5000" >
         </EditText>
     </LinearLayout>
-    
+
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -86,10 +86,41 @@
         </EditText>
     </LinearLayout>
 
-    <Button
-        android:id="@+id/send_button"
-        android:layout_width="150dp"
+    <LinearLayout
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="Send" />
+        android:orientation="horizontal" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Send Interval (ms)" />
+
+        <EditText
+            android:id="@+id/send_itvl_text"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:text="100" >
+        </EditText>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/start_chirp_button"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:text="Start Chirp" />
+
+        <Button
+            android:id="@+id/stop_chirp_button"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:text="Stop Chirp" />
+    </LinearLayout>
 
 </LinearLayout>

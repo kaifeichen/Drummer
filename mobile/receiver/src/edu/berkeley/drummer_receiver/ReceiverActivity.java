@@ -4,6 +4,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 
 import android.app.Activity;
 import android.media.AudioFormat;
@@ -11,41 +12,31 @@ import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.Toast;
 
-public class ReceiverActivity extends Activity implements View.OnClickListener {
+public class ReceiverActivity extends Activity {
+	private boolean mRunning = false;
+	private File mAudioDir;
+	private File mReportDir;
+	private BufferedOutputStream mAudioOS;
+	private BufferedOutputStream mReportOS;
 	private AudioRecordThread mRecordThread;
 	private final int mSampleRate = 44100;
-	private EditText mDurationText;
-	private Button mRecvButton;
-	private Handler mHandler;
+	private Button mStartButton;
+	private Button mStopButton;
+	private Button mReportDoorButton;
+	private Button mReportCornerButton;
 	private IMU mIMU;
 
 	private class AudioRecordThread extends Thread {
 		private volatile boolean mRun = true;
 		private final AudioRecord mRecorder;
-		private BufferedOutputStream mOutStream;
 		private final int mBufSize;
 
 		public AudioRecordThread() {
-			final File sdCard = Environment.getExternalStorageDirectory();
-			final File directory = new File(sdCard.getAbsolutePath()
-					+ "/Drummer");
-			final String fileName = Long.toString(System.currentTimeMillis())
-					+ ".dat";
-			final File file = new File(directory, fileName);
-
-			try {
-				mOutStream = new BufferedOutputStream(
-						new FileOutputStream(file));
-			} catch (final FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
 			// TODO buffsize and mRecorder should be created in onCreate
 			mBufSize = AudioRecord
 					.getMinBufferSize(mSampleRate, AudioFormat.CHANNEL_IN_MONO,
@@ -57,7 +48,7 @@ public class ReceiverActivity extends Activity implements View.OnClickListener {
 
 		@Override
 		public void run() {
-			// setPriority(Thread.MAX_PRIORITY);
+			setPriority(Thread.MAX_PRIORITY);
 			try {
 				mRecorder.startRecording();
 				while (mRun == true) {
@@ -66,56 +57,130 @@ public class ReceiverActivity extends Activity implements View.OnClickListener {
 					// buffer.length bytes are recorded
 					mRecorder.read(buffer, 0, buffer.length); // Bytes
 					System.out.print(buffer);
-					mOutStream.write(buffer);
+					mAudioOS.write(buffer);
 				}
-				mOutStream.flush();
-				mOutStream.close();
 				mRecorder.stop();
 				mRecorder.release();
 			} catch (final Exception e) {
 				e.printStackTrace();
 			}
 		}
+
 		public void terminate() {
 			mRun = false;
 		}
 	}
 
+	private final OnClickListener mStartListener = new OnClickListener() {
+
+		@Override
+		public void onClick(final View v) {
+			start();
+		}
+	};
+
+	private final OnClickListener mStopListener = new OnClickListener() {
+
+		@Override
+		public void onClick(final View v) {
+			stop();
+		}
+	};
+
+	private final OnClickListener mReportListener = new OnClickListener() {
+
+		@Override
+		public void onClick(final View v) {
+			final int buttonId = v.getId();
+			try {
+				String data;
+				if (buttonId == R.id.report_door_button) {
+					data = System.currentTimeMillis() + " ";
+					data += System.nanoTime() + " ";
+					data += "Door\n";
+					mReportOS.write(data.getBytes());
+				} else if (buttonId == R.id.report_corner_button) {
+					data = System.currentTimeMillis() + " ";
+					data += System.nanoTime() + " ";
+					data += "Corner\n";
+					mReportOS.write(data.getBytes());
+				}
+			} catch (final IOException e) {
+				Toast.makeText(ReceiverActivity.this, e.toString(),
+						Toast.LENGTH_LONG).show();
+			}
+		}
+	};
+
 	@Override
 	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		mRecvButton = (Button) findViewById(R.id.recv_button);
-		mDurationText = (EditText) findViewById(R.id.recv_duration_text);
-		mHandler = new Handler();
-		mRecvButton.setOnClickListener(this);
+		mStartButton = (Button) this.findViewById(R.id.start_imu_button);
+		mStopButton = (Button) this.findViewById(R.id.stop_imu_button);
+		mReportDoorButton = (Button) this.findViewById(R.id.report_door_button);
+		mReportCornerButton = (Button) this
+				.findViewById(R.id.report_corner_button);
+
+		mStartButton.setOnClickListener(mStartListener);
+		mStopButton.setOnClickListener(mStopListener);
+		mReportDoorButton.setOnClickListener(mReportListener);
+		mReportCornerButton.setOnClickListener(mReportListener);
+
+		mStartButton.setEnabled(true);
+		mStopButton.setEnabled(false);
+		mReportDoorButton.setEnabled(false);
+		mReportCornerButton.setEnabled(false);
 
 		// This will get the SD Card directory and create a folder named
 		// Drummer in it.
 		final File sdCard = Environment.getExternalStorageDirectory();
-		final File directory = new File(sdCard.getAbsolutePath() + "/Drummer");
-		directory.mkdirs();
+		mAudioDir = new File(sdCard.getAbsolutePath() + "/Drummer/Audio");
+		mAudioDir.mkdirs();
+		mReportDir = new File(sdCard.getAbsolutePath() + "/Drummer/Report");
+		mReportDir.mkdirs();
 
 		mIMU = new IMU(this);
 	}
-
 	@Override
 	public void onPause() {
-		mIMU.stop();
-		if (mRecordThread != null) {
-			mRecordThread.terminate();
-			try {
-				mRecordThread.join();
-			} catch (final InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
+		stop();
 		super.onPause();
 	}
 
-	private final Runnable mPauseTask = new Runnable() {
-		@Override
-		public void run() {
+	private void start() {
+		mStartButton.setEnabled(false);
+		mStopButton.setEnabled(true);
+		mReportDoorButton.setEnabled(true);
+		mReportCornerButton.setEnabled(true);
+
+		mRunning = true;
+
+		try {
+			final String audioFileName = Long.toString(System
+					.currentTimeMillis()) + ".txt";
+			final File audioFile = new File(mAudioDir, audioFileName);
+			mAudioOS = new BufferedOutputStream(new FileOutputStream(audioFile));
+
+			final String reportFileName = Long.toString(System
+					.currentTimeMillis()) + ".txt";
+			final File reportFile = new File(mReportDir, reportFileName);
+			mReportOS = new BufferedOutputStream(new FileOutputStream(
+					reportFile));
+		} catch (final FileNotFoundException e) {
+			Toast.makeText(this, e.toString(), Toast.LENGTH_LONG).show();
+		}
+
+		mRecordThread = new AudioRecordThread();
+		mRecordThread.start();
+
+		mIMU.start();
+	}
+
+	public void stop() {
+		if (mRunning == true) {
+			mIMU.stop();
+
 			mRecordThread.terminate();
 			try {
 				mRecordThread.join();
@@ -124,20 +189,28 @@ public class ReceiverActivity extends Activity implements View.OnClickListener {
 				e.printStackTrace();
 			}
 			mRecordThread = null;
-			mHandler.removeCallbacks(mPauseTask);
-			mRecvButton.setEnabled(true);
+
+			try {
+				if (mAudioOS != null) {
+					mAudioOS.flush();
+					mAudioOS.close();
+					mAudioOS = null;
+				}
+				if (mReportOS != null) {
+					mReportOS.flush();
+					mReportOS.close();
+					mReportOS = null;
+				}
+			} catch (final IOException e) {
+				Toast.makeText(this, e.toString(), Toast.LENGTH_LONG).show();
+			}
+
+			mRunning = false;
+
+			mStartButton.setEnabled(true);
+			mStopButton.setEnabled(false);
+			mReportDoorButton.setEnabled(false);
+			mReportCornerButton.setEnabled(false);
 		}
-	};
-
-	@Override
-	public void onClick(final View v) {
-		mRecvButton.setEnabled(false);
-		mRecordThread = new AudioRecordThread();
-
-		final long recvDuration = Long.parseLong(mDurationText.getText()
-				.toString());
-
-		mRecordThread.start();
-		mHandler.postDelayed(mPauseTask, recvDuration);
 	}
 }

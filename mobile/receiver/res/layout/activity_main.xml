@@ -10,47 +10,28 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".ReceiverActivity" >
 
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" >
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Receive Duration (ms)" />
-
-        <EditText
-            android:id="@+id/recv_duration_text"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:inputType="number"
-            android:text="3000" >
-        </EditText>
-    </LinearLayout>
-
     <Button
-        android:id="@+id/recv_button"
+        android:id="@+id/start_imu_button"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
-        android:text="Listen" />
+        android:text="Start Move" />
 
-    <LinearLayout
-        android:layout_width="fill_parent"
+    <Button
+        android:id="@+id/stop_imu_button"
+        android:layout_width="150dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal" >
-
-        <Button
-            android:id="@+id/start_imu_button"
-            android:layout_width="150dp"
-            android:layout_height="wrap_content"
-            android:text="Start Move" />
-
-        <Button
-            android:id="@+id/stop_imu_button"
-            android:layout_width="150dp"
-            android:layout_height="wrap_content"
-            android:text="Stop Move" />
-    </LinearLayout>
+        android:text="Stop Move" />
+    
+    <Button
+        android:id="@+id/report_door_button"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:text="Report Door" />
+    
+    <Button
+        android:id="@+id/report_corner_button"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:text="Report Corner" />
 
 </LinearLayout>
