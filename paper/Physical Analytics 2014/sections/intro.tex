@@ -1,71 +1,133 @@
 \section{Introduction}
 \label{sec:intro}
 
-\fxnote{if not many applications can be found. 
-change to: calibration information is important for indoor localization, people are 
-using different ways to do that, sound is one way that is better .}
+
+Indoor localization enables plenty of location-based applications. 
 
 
 
-% acoustic signal was used a lot for environment detection
-Audio probing has been used for tens of years in various ways to help indirectly
-inspect environments or objects. Sonar is used by vessels to leverage sound propagation 
-time to detect underwater objects. Ultrasonography uses ultrasound to generate
-diagnostic imaging of subcutaneous body structures in clinics. \fxnote{more use cases}
-Given the physical attributes of audio signal, it is idea for use in environment detection.
-Sound wave is longitudinal mechanical wave, so \fxnote{what?}. 
 
-
-% acoustic signal should be used for environment detection but not
-With ubiquitous audio devices (e.g.\ microphone and speaker) built in all phones, 
-acoustic signal should also be used for 
-environment detection as an service. Applications including indoor localization, occupancy detection,
-and 3D model reconstruction, can benefit from the feedback of this service.
-However, acoustic devices in mobile phones gain little attention in 
-industry and have not been evolved as much as other components \cite{invensense, applem7} 
-in terms of providing physical information.
-Most acoustic applications is focusing on semantic information in voice, such as natural 
-language processing and text-to-speech synthesis. These areas require only audible
-sounds with adequate 
-accuracy, and have good baseline proof of feasibility that human brain can process it
-\cite{nirjon2013auditeur}.
-Whereas smart phones haven't made the step to evolve from a phone to a smart 
-mobile device that could converts physical information into cyber world using acoustic signal. 
-Worse still, most phones do audible sound specific optimizations in operating systems or 
-hardware firmware, and provide no access to the raw audio data. Specifically, mobile phone
-tend to audio noise cancellation for communication and entertainment quality, which makes 
-it impossible to record the sound sent by itself in application layer.
-
-
-% current work on audio probing 
-In spite of these impediments, several recent work has been done on inferring physical world 
-information using acoustic signal feature. Examples include: gesture detection using Doppler effect
-\cite{gupta2012soundwave, sun2013spartacus}, room shape reconstruction using echo \cite{dokmanic2013acoustic}, 
-blah
- \fxnote{details about those work}
-
-
-% our work
-In this paper, we introduce {\em Drummer} - a mobile could service to enable several environment awareness 
-features using acoustic signal. \fxnote{goal, arch, algorithm}
+People has been attempting indoor localization in a wide scope of approaches, ranging from 
+trilateration to fingerprinting to dead reckoning. Inertial measurement units (IMU), 
+mostly referring accelerometer, 
+compass, and gyroscope, have been ubiquitous with the explosion of mobile phones, and used in
+estimating in-building trajectories for localization. However, because of hardware limitation, 
+IMU in mobile phone suffer from drift and cumulative errors. 
 
 
 
-% summary
-In summary, our contributions are:
-
-\begin{itemize}
-
-\item Propose several environment detection features and their algorithms.
-
-\item Investigate how good we can get for each feature, and advocate industry to enable 
-more raw information from hardware layer, and expand the functionality of audio devices, 
-such as maximum sending and sampling frequency.
-
-\end{itemize}
+% we need semantic location
+However, the focuses of these work are not perfectly in line with requirements from location-based services (LBS). 
+Most of them are purely focusing on how to localize a geometric location, whereas 
+many indoor LBS also requires the semantic of the location rather than the location itself, such as room number,
+or a handicap door. \fxnote{say geometric is important, interaction, proximity social network} 
+One example of indoor LBS is occupancy driven HVAC (heating, ventilation, and air conditioning).
+Because HVAC control are at most room-level granularity, so estimating the number of room the 
+user is in will be more nature and helpful. For LBSs that requires geometric locations, semantic will also help
+in many cases. For instance, proximity based social network \fxnote{[cite]} need to ensure two people staying near
+to each other have no wall in between. 
 
 
-% roadmap
+
+% \fxnote{geometric location needs calibration}
+Geometric location can be done by: trilateration or triangulation, dense site survey + fingerprinting, dead reckoning.
+First one doesn't work because of obstacles, second doesn't work because training overhead. 3rd works, but it needs calibration. 
+step count, particle filter, kalman filter.
+
+
+Location semantics can be inferred in different approaches. One way is to get geometric location with 
+adequate accuracy. By using predefined location to semantic information database \fxnote{[cite]}, we can get semantic information
+by querying geometric locations, which is also adopted by the majority of outdoor location-based services.
+However, given much richer information and faster environment change, creating and maintaining such as a
+semantic database is not feasible in most buildings. On the other hand, many semantic information requires
+find grained geometric estimation that can hardly be archived by state-of-art localization techniques. For 
+example, energy foot-printing \fxnote{[cite]} is the notion of monitoring personal energy consumption
+according to her location and 
+the electronic devices (e.g. coffee machine, refrigerator, microwave) being used at that location. The 
+distance between these devices can be sub-meter, and no current geometric localization technique can achieve this 
+accuracy in general cases. Another idea to infer semantic location is from the physical features, and it is very application
+specific. For instance, a room is usually enclosed by walls, so you should be able to encode room number in 
+special light bulbs, and give perfect room-level localization. However, some office buildings use glasses to separate
+rooms. %Also ultrasound beacon may also work, but some buildings has no door 
+For energy foot-printing, one can actually either see (by camera) or hear (by microphone) what the user is doing.
+
+
+
+% intro of Drummer
+In this paper, we introduce {\em Drummer}, a environment probing and listening service 
+to assist both geometric calibration and semantic indoor localization inference. The basic idea is sound 
+can be used to measure distance from walls, and also learn human activities that will create featured sound.
+This solve all problems, because: it can 
+provide continuous calibration, it can detect environment change, 
+it provide room level fingerprining, sound has plenty potential of inferring activity (fridge/coffee machine).
+
+
+In summary, our contributions are: (i) it can provide continuous calibration. (ii) it can detect environment change. 
+(iii) it provide room level fingerprining. (iv) sound has plenty potential of inferring activity (fridge/coffee machine).
+(v) provide huge potential for extension and improvements
+
+Roadmap: Section 2 related work and their faults, Section 3 overview, Section 4 calibrations, Section 5 Physical inference, 
+Section 6 evaluation. Section 7 Discussion. Section 8 Conclusion
+
+% % acoustic signal was used a lot for environment detection
+% Audio probing has been used for tens of years in various ways to help indirectly
+% inspect environments or objects. Sonar is used by vessels to leverage sound propagation 
+% time to detect underwater objects. Ultrasonography uses ultrasound to generate
+% diagnostic imaging of subcutaneous body structures in clinics. \fxnote{more use cases}
+% Given the physical attributes of audio signal, it is idea for use in environment detection.
+% Sound wave is longitudinal mechanical wave, so \fxnote{what?}. 
+
+
+% % acoustic signal should be used for environment detection but not
+% With ubiquitous audio devices (e.g.\ microphone and speaker) built in all phones, 
+% acoustic signal should also be used for 
+% environment detection as an service. Applications including indoor localization, occupancy detection,
+% and 3D model reconstruction, can benefit from the feedback of this service.
+% However, acoustic devices in mobile phones gain little attention in 
+% industry and have not been evolved as much as other components \cite{invensense, applem7} 
+% in terms of providing physical information.
+% Most acoustic applications is focusing on semantic information in voice, such as natural 
+% language processing and text-to-speech synthesis. These areas require only audible
+% sounds with adequate 
+% accuracy, and have good baseline proof of feasibility that human brain can process it
+% \cite{nirjon2013auditeur}.
+% Whereas smart phones haven't made the step to evolve from a phone to a smart 
+% mobile device that could converts physical information into cyber world using acoustic signal. 
+% Worse still, most phones do audible sound specific optimizations in operating systems or 
+% hardware firmware, and provide no access to the raw audio data. Specifically, mobile phone
+% tend to audio noise cancellation for communication and entertainment quality, which makes 
+% it impossible to record the sound sent by itself in application layer.
+
+
+% % current work on audio probing 
+% In spite of these impediments, several recent work has been done on inferring physical world 
+% information using acoustic signal feature. Examples include: gesture detection using Doppler effect
+% \cite{gupta2012soundwave, sun2013spartacus}, room shape reconstruction using echo \cite{dokmanic2013acoustic}, 
+% blah
+%  \fxnote{details about those work}
+
+
+% % our work
+% In this paper, we introduce {\em Drummer} - a mobile could service to enable several environment awareness 
+% features using acoustic signal. \fxnote{goal, arch, algorithm}
+
+
+
+% % summary
+% In summary, our contributions are:
+
+% \begin{itemize}
+
+% \item Propose several environment detection features and their algorithms.
+
+% \item Investigate how good we can get for each feature, and advocate industry to enable 
+% more raw information from hardware layer, and expand the functionality of audio devices, 
+% such as maximum sending and sampling frequency.
+
+% \end{itemize}
+
+
+% % roadmap
 
 
 % To learn the environment, computer vision techniques has been proposed to capture 
