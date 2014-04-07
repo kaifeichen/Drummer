@@ -17,6 +17,9 @@ public class SenderActivity extends Activity {
 	private final int mSampleRate = 44100; // Hz
 	private final double mMaxDuration = 100; // in ms, to avoid long noisy
 	private final short mMaxAmp = 0x7FFF; // 32767
+	// amplitude compensation to for ease of signal start detection
+	private final double mAmpComp = 0.2;
+	private final double mStartPhase = Math.PI / 2;
 	// UI objects
 	private EditText mAmpRatioText;
 	private EditText mStartFreqText;
@@ -73,7 +76,7 @@ public class SenderActivity extends Activity {
 			final short maxAmp = (short) (Double.parseDouble(mAmpRatioText
 					.getText().toString()) * mMaxAmp);
 			mSamples = getSamples(duration, mStartFreq, mStopFreq, mMinBufSize,
-					mSampleRate, maxAmp);
+					mSampleRate, maxAmp, mAmpComp);
 		}
 
 		@Override
@@ -88,7 +91,8 @@ public class SenderActivity extends Activity {
 
 		private final short[] getSamples(final double duration,
 				final double startFreq, final double stopFreq,
-				final int minBufSize, final int sampleRate, final short maxAmp) {
+				final int minBufSize, final int sampleRate, final short maxAmp,
+				final double ampComp) {
 			final int sampleNum = (int) (duration * sampleRate);
 			final int bufSize = sampleNum < minBufSize ? minBufSize : sampleNum;
 
@@ -98,16 +102,15 @@ public class SenderActivity extends Activity {
 			final double k = linearChirpRate(stopFreq - startFreq, duration);
 			double time = 0.0;
 			for (int i = 0; i < sampleNum; i++) {
-				// linear chirp with Blackman–Harris window
+				// linear chirp with window + amplitude compensation
 				samples[i] = (short) (maxAmp
-						* linearChirp(time, k, startFreq, 0) * cosWindow(i,
-						sampleNum));
+						* linearChirp(time, k, startFreq, mStartPhase) * (cosWindow(
+						i, sampleNum) + ampComp));
 				time += 1.0 / sampleRate;
 			}
 
 			return samples;
 		}
-
 		// return frequency change rate k given start and stop frequency
 		private double linearChirpRate(final double freqSpan,
 				final double timeSpan) {
@@ -172,6 +175,8 @@ public class SenderActivity extends Activity {
 
 		mStartButton.setOnClickListener(mStartListener);
 		mStopButton.setOnClickListener(mStopListener);
+		mStartButton.setEnabled(true);
+		mStopButton.setEnabled(false);
 	}
 
 	@Override
