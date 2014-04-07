@@ -100,7 +100,7 @@ public class SenderActivity extends Activity {
 			for (int i = 0; i < sampleNum; i++) {
 				// linear chirp with Blackman–Harris window
 				samples[i] = (short) (maxAmp
-						* linearChirp(time, k, startFreq, 0) * bhWindow(i,
+						* linearChirp(time, k, startFreq, 0) * cosWindow(i,
 						sampleNum));
 				time += 1.0 / sampleRate;
 			}
@@ -132,6 +132,13 @@ public class SenderActivity extends Activity {
 			final double val = a0 - a1 * Math.cos(2 * Math.PI * n / (N - 1))
 					+ a2 * Math.cos(4 * Math.PI * n / (N - 1)) - a3
 					* Math.cos(6 * Math.PI * n / (N - 1));
+			return val;
+		}
+
+		// Cosine window
+		// http://en.wikipedia.org/wiki/Window_function#Cosine_window
+		private double cosWindow(final int n, final int N) {
+			final double val = Math.sin(Math.PI * n / (N - 1));
 			return val;
 		}
 	}
