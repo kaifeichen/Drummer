@@ -29,3 +29,24 @@ def hamming_window(n, N):
 def cosine_window(n, N):
     val = math.sin(math.pi * n / (N - 1))
     return val
+
+
+# Gaussian window
+# http://en.wikipedia.org/wiki/Window_function#Gaussian_window
+def gaussian_window(n, N, std=0.4):
+    val = math.exp(-1.0/2*math.pow((n - (N-1)/2)/(std*(N-1)/2), 2))
+    return val
+
+
+# kaiser window will be hard to calculate, becaue bessel is hard
+# def kaiser_window(n, N, alpha=3):
+#     # zero-th order modified Bessel function of the first kind
+#     # 
+#     def bessel():
+#         # gamma function
+#         # http://en.wikipedia.org/wiki/Gamma_function
+#         for m in range():
+
+#         math.gamma(x)
+#     val = bessel(math.pi * alpha * math.sqrt(1 - math.pow((2*n/(N-1) - 1), 2))) / bessel(math.pi*alpha)
+#     return val

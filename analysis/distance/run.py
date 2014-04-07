@@ -74,7 +74,7 @@ if __name__ == "__main__":
     # plt.plot(filtered_amps)
     # plt.show()
 
-    signal_func = lambda t: origin_signal.get_sample(t, duration, startfreq, endfreq, sample_rate, amp_ratio*max_amp, window.hamming_window)
+    signal_func = lambda t: origin_signal.get_sample(t, duration, startfreq, endfreq, sample_rate, amp_ratio*max_amp, window.cosine_window)
 
     tmp = []
     for i in range(int(0.05*44100)):
