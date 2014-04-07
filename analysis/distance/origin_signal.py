@@ -4,9 +4,9 @@ import window
 
 
 # get one value at any time from windowed linear chirp
-def get_sample(time, duration, start_freq, stop_freq, sample_rate, max_amp, win_func=window.hamming_window):
+def get_sample(time, duration, start_freq, stop_freq, start_phase, sample_rate, max_amp, win_func):
     k = linear_chirp_rate(stop_freq-start_freq, duration)
-    chirp_val = max_amp * linear_chirp(time, k, start_freq, start_phase=0)
+    chirp_val = max_amp * linear_chirp(time, k, start_freq, start_phase)
     N = 1e10 # make it large enough to get enough accuracy
     n = time/duration*N
     window_val = win_func(n, N)

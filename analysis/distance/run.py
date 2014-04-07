@@ -53,28 +53,31 @@ if __name__ == "__main__":
     ap.add_argument('-f', '--fname', help="input file")
     ap.add_argument('-s', '--startfreq', type=int, help="low frequency")
     ap.add_argument('-e', '--endfreq', type=int, help="high frequency")
+    ap.add_argument('-p', '--startphase', type=int, help="start phase")
     ap.add_argument('-d', '--duration', type=float, help="duration")
     ap.add_argument('-r', '--ratio', type=float, help="amplitude ratio")
 
     args = ap.parse_args()
     fname = args.fname
-    startfreq = args.startfreq
-    endfreq = args.endfreq
+    start_freq = args.startfreq
+    end_freq = args.endfreq
+    start_phase = args.startphase
     duration = args.duration
     amp_ratio = args.ratio
     sample_rate = 44100
     max_amp = 0x7FFF
+    filter_width = 500
 
     amps = read_data(fname)
 
-    lowcut = startfreq - 500
-    highcut = endfreq + 500
-    filtered_amps = bpfilter.butter_bandpass_filter(amps, lowcut, highcut, sample_rate, order=9)
+    low_cut = start_freq - filter_width
+    high_cut = end_freq + filter_width
+    filtered_amps = bpfilter.butter_bandpass_filter(amps, low_cut, high_cut, sample_rate, order=9)
 
     # plt.plot(filtered_amps)
     # plt.show()
 
-    signal_func = lambda t: origin_signal.get_sample(t, duration, startfreq, endfreq, sample_rate, amp_ratio*max_amp, window.cosine_window)
+    signal_func = lambda t: origin_signal.get_sample(t, duration, start_freq, end_freq, start_phase, sample_rate, amp_ratio*max_amp, window.cosine_window)
 
     tmp = []
     for i in range(int(0.05*44100)):
