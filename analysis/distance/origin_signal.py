@@ -4,12 +4,12 @@ import window
 
 
 # get one value at any time from windowed linear chirp
-def get_sample(time, duration, start_freq, stop_freq, start_phase, sample_rate, max_amp, win_func):
+def get_sample(time, duration, start_freq, stop_freq, start_phase, max_amp, win_func, amp_comp):
     k = linear_chirp_rate(stop_freq-start_freq, duration)
     chirp_val = max_amp * linear_chirp(time, k, start_freq, start_phase)
     N = 1e10 # make it large enough to get enough accuracy
     n = time/duration*N
-    window_val = win_func(n, N)
+    window_val = win_func(n, N) + amp_comp
     return chirp_val*window_val
 
 

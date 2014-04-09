@@ -56,6 +56,7 @@ if __name__ == "__main__":
     ap.add_argument('-p', '--startphase', type=int, help="start phase")
     ap.add_argument('-d', '--duration', type=float, help="duration")
     ap.add_argument('-r', '--ratio', type=float, help="amplitude ratio")
+    ap.add_argument('-c', '--ampcomp', type=float, help="amplitude compensation")
 
     args = ap.parse_args()
     fname = args.fname
@@ -64,8 +65,9 @@ if __name__ == "__main__":
     start_phase = args.startphase
     duration = args.duration
     amp_ratio = args.ratio
+    amp_comp = args.ampcomp
     sample_rate = 44100
-    max_amp = 0x7FFF
+    max_amp = 0x7FFF # 32767
     filter_width = 500
 
     amps = read_data(fname)
@@ -77,15 +79,18 @@ if __name__ == "__main__":
     # plt.plot(filtered_amps)
     # plt.show()
 
-    signal_func = lambda t: origin_signal.get_sample(t, duration, start_freq, end_freq, start_phase, sample_rate, amp_ratio*max_amp, window.cosine_window)
-
+    signal_func = lambda t: origin_signal.get_sample(t, duration, start_freq, end_freq, start_phase, amp_ratio*max_amp, window.cosine_window, amp_comp)
     tmp = []
     for i in range(int(0.05*44100)):
         tmp.append(signal_func(float(i)/44100))
     plt.plot(tmp)
     plt.show()
-
-    substracted_amps = audio_substract.substract(filterd_amps, signal_func)
+    signal_func.duration = duration
+    signal_func.start_freq = start_freq
+    signal_func.end_freq = end_freq
+    signal_func.start_phase = start_phase
+    signal_func.window = window.cosine_window
+    substracted_amps = audio_substract.substract(filtered_amps, sample_rate, signal_func)
 
     time = float(find_distance(reduced_amps)) / 44100 * 340 / 2 
     print time
