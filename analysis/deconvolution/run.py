@@ -9,6 +9,9 @@ from subprocess import call
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 import origin_signal
+import bpfilter
+import peakdetect
+from numpy import array
 
 
 chirp_echo_duration = 0.030 # in second
@@ -45,12 +48,28 @@ if __name__ == "__main__":
     #read
     amps = read_data(args.fname)
 
+    #filter 
+    # lowcut = start_freq - 1000
+    # highcut = end_freq + 1000
+    # fs = 44100
+    # filtered_amps = bpfilter.butter_bandpass_filter(amps, lowcut, highcut, fs, order=9)
+
     #origin signal
     signal_func = lambda t: origin_signal.get_sample(t, duration, start_freq, end_freq, start_phase, amp_ratio*max_amp, None, None, origin_signal.log_chirp)
     chirp_amps = numpy.array([signal_func(t) for t in numpy.arange(0, float(duration), step=1.0/sample_rate)])
     reversed_chirp_amps = chirp_amps[::-1]
     
-    ir_amps = numpy.convolve(amps, reversed_chirp_amps, 'valid')
+    # deconvolution
+    ir_amps = numpy.convolve(amps, reversed_chirp_amps, 'vaid')
 
-    plt.plot(ir_amps)
+    # envelop
+    hilbert_amps = numpy.abs(signal.hilbert(ir_amps))
+
+    maxtab, _ = peakdetect.peakdet(hilbert_amps, delta=2e10)
+
+    times = (maxtab[:,0][1:] - maxtab[:,0][0]) / 44100 * 340 /2
+    print times
+
+    plt.scatter(array(maxtab)[:,0], array(maxtab)[:,1], color='red')
+    plt.plot(hilbert_amps)
     plt.show()
