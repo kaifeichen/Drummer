@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    
+
+    <string-array name="signal_array">
+        <item>Linear Chirp</item>
+        <item>Log Chirp</item>
+    </string-array>
+    <string-array name="window_array">
+        <item>None</item>
+        <item>Cosine</item>
+        <item>Blackman-Harris</item>
+    </string-array>
+
 </resources>
