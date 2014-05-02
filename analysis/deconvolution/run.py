@@ -49,10 +49,22 @@ if __name__ == "__main__":
     amps = read_data(args.fname)
 
     #filter 
-    # lowcut = start_freq - 1000
-    # highcut = end_freq + 1000
-    # fs = 44100
-    # filtered_amps = bpfilter.butter_bandpass_filter(amps, lowcut, highcut, fs, order=9)
+    # The Nyquist rate of the signal.
+    nyq_rate = sample_rate / 2.0
+    # The desired width of the transition from pass to stop,
+    # relative to the Nyquist rate.  We'll design the filter
+    # with a 5 Hz transition width.
+    width = 5.0/nyq_rate
+    # The desired attenuation in the stop band, in dB.
+    ripple_db = 60.0
+    # Compute the order and Kaiser parameter for the FIR filter.
+    N, beta = signal.kaiserord(ripple_db, width)
+    # The cutoff frequency of the filter.
+    cutoff_hz = end_freq + 1000
+    # Use firwin with a Kaiser window to create a lowpass FIR filter.
+    taps = signal.firwin(N, cutoff_hz/nyq_rate, window=('kaiser', beta))
+    # Use lfilter to filter x with the FIR filter.
+    filtered_amps = signal.lfilter(taps, 1.0, amps)
 
     #origin signal
     signal_func = lambda t: origin_signal.get_sample(t, duration, start_freq, end_freq, start_phase, amp_ratio*max_amp, None, None, origin_signal.log_chirp)
@@ -60,15 +72,15 @@ if __name__ == "__main__":
     reversed_chirp_amps = chirp_amps[::-1]
     
     # deconvolution
-    ir_amps = numpy.convolve(amps, reversed_chirp_amps, 'vaid')
+    ir_amps = numpy.convolve(filtered_amps, reversed_chirp_amps, 'valid')
 
     # envelop
     hilbert_amps = numpy.abs(signal.hilbert(ir_amps))
 
     maxtab, _ = peakdetect.peakdet(hilbert_amps, delta=2e10)
 
-    times = (maxtab[:,0][1:] - maxtab[:,0][0]) / 44100 * 340 /2
-    print times
+    distances = (maxtab[:,0][1:] - maxtab[:,0][0]) / 44100 * 340 /2
+    print distances
 
     plt.scatter(array(maxtab)[:,0], array(maxtab)[:,1], color='red')
     plt.plot(hilbert_amps)
