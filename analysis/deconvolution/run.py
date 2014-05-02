@@ -78,6 +78,8 @@ if __name__ == "__main__":
     hilbert_amps = numpy.abs(signal.hilbert(ir_amps))
 
     maxtab, _ = peakdetect.peakdet(hilbert_amps, delta=2e8)
+    maxidx = numpy.argmax(maxtab[:,1])
+    maxtab = maxtab[maxidx:,:]
 
     print maxtab
     distances = (maxtab[:,0][1:] - maxtab[:,0][0]) / 44100 * 340 /2
