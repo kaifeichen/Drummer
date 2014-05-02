@@ -48,7 +48,7 @@ if __name__ == "__main__":
     #read
     amps = read_data(args.fname)
 
-    #filter 
+    #filter: http://wiki.scipy.org/Cookbook/FIRFilter 
     # The Nyquist rate of the signal.
     nyq_rate = sample_rate / 2.0
     # The desired width of the transition from pass to stop,
@@ -77,8 +77,9 @@ if __name__ == "__main__":
     # envelop
     hilbert_amps = numpy.abs(signal.hilbert(ir_amps))
 
-    maxtab, _ = peakdetect.peakdet(hilbert_amps, delta=2e10)
+    maxtab, _ = peakdetect.peakdet(hilbert_amps, delta=2e8)
 
+    print maxtab
     distances = (maxtab[:,0][1:] - maxtab[:,0][0]) / 44100 * 340 /2
     print distances
 
