@@ -11,8 +11,8 @@
 
 
 The system archtecture of Drummer is shown in figure \ref{fig:arch}. The mobile phone drummer 
-client keeps minimum work and offloads data and computation to the cloud, assuming we always
-have good network connectivity to stream audio data. Tackling with bad network conditions 
+client keeps minimum work and offloads data and computation to the cloud. In this paper, we assume 
+network connectivity are awalys sufficient to stream audio data. Tackling with bad network conditions 
 \cite{cuervo2010maui} and optimizing audio streaming \cite{farleycsense} are also important 
 problems, but they are outside the scope of this paper. A drummer server maintains a TCP connection
 with each client for upstream audio streaming and downstream event-based environmental information
