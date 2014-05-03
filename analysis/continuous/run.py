@@ -101,7 +101,7 @@ def plot_probe(enve_amps, duration, fs, ampthld, create_video = False, plot_chan
 
         fig = plt.figure()
         ax = fig.gca()
-        surf = ax.pcolor(chirp_times, echo_times, numpy.abs(changes), cmap=cm.coolwarm, linewidth=0)
+        surf = ax.pcolor(chirp_times, echo_times, numpy.abs(changes), cmap=cm.Greys, linewidth=0)
         plt.axis([chirp_times.min(), chirp_times.max(), echo_times.min(), echo_times.max()])
 
         xtickitvl = 2 #second
