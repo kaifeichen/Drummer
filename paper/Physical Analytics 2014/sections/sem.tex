@@ -1,8 +1,8 @@
 \section{Semantic Location}
 \label{sec:sem}
 
-Aside from geometric locations, location semantics are usually more desired by applications.
-Imaging a occupancy-driven HVAC controlling system, it is more preferable to locate a person 
+Aside from geometric locations, semantics are usually more desired by applications.
+Imagining a occupancy-driven HVAC controlling system, it is more preferable to locate a person 
 at the other corner of the same room she is in, than a nearer point in the adjacent room. Also,
 Knowing a person is using a coffee machine or microwave is more interesting than in front of which 
 one she is standing. Generally speaking, activity are heavily inter-weaved with localization.
@@ -15,17 +15,27 @@ of user, as well as sound-based activity recognitions.
 \centering
 \includegraphics[width=0.45\textwidth]{./fig/transition.png}
 \caption{Door Event}
+\label{fig:tx}
 \end{figure}
 
 
-Rooms mostly come with physical walls in between, particularly when there is demand for 
-room-level applications or services, such as room temperature or lighting control. Inferring and 
+Rooms mostly come with physical walls in between, particularly when there is application demand for 
+room-level distinction, such as room temperature or lighting control. Inferring and 
 detecting room transition should be an essential functionality in indoor localization service.
-Sound echo is ideal to detect the user going though a wall, which will cause a sudden environment 
-change and also acoustic echo pattern change.
+Going though a wall will cause a sudden environment 
+and acoustic echo pattern change, which makes sound ideal for environment transition detection. 
+Drummer captures these changes and provides room transitions event to 
+localization service. When accelerometer data shows the person is moving, Drummer turns on periodic 
+chirping, continuously records the audio, and streams it to Drummer server. 
 
 
-Drummer enables continuous environment probing when accelerometer data shows the person is moving.
+
+Server calculates the differences between contiguous echoes over time. It stores the differences,
+and sort them by the starting time of echoes. We call this representation a {\em echogram}. And the transition 
+happens when a cluster of large
+differences appears on a echogram. To illustrate, Figure \ref{fig:tx} shows the trajectory and corresponding 
+echogram. 
+
  
 
 
