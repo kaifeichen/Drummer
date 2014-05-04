@@ -75,15 +75,12 @@ if __name__ == "__main__":
     hilbert_amps = numpy.abs(signal.hilbert(ir_amps))
 
     # find peaks
-    maxtab, _ = peakdetect.peakdet(hilbert_amps, delta=5e8)
+    maxtab, _ = peakdetect.peakdet(hilbert_amps, delta=0.2*1e9)
     maxidx = numpy.argmax(maxtab[:,1])
     maxtab = maxtab[maxidx:,:]
 
     hilbert_amps = hilbert_amps[maxtab[0,0]:]
     maxtab[:,0] = maxtab[:,0] - maxtab[0,0]
-    distances = maxtab[1:,0] / 44100 * 340 /2
-    print distances
-    print maxtab[1:,1] / 1e9
 
     # theoretical signal shape
     theo_ir_amps = numpy.convolve(chirp_amps, reversed_chirp_amps, 'full')
@@ -94,7 +91,13 @@ if __name__ == "__main__":
     theo_hilbert_amps = theo_hilbert_amps[theo_maxtab[0,0]:]
     theo_hilbert_amps = hilbert_amps[0]/theo_hilbert_amps[0]*theo_hilbert_amps
 
-
+    distances = maxtab[1:,0] / 44100 * 340 /2
+    noise_amp = numpy.mean(hilbert_amps[2000:]) # TODO may be smaller than 2000
+    for i in range(len(distances)):
+        theo_amp = theo_hilbert_amps[maxtab[1+i,0]] if maxtab[1+i,0] < len(theo_hilbert_amps) else theo_hilbert_amps[-1]
+        amp_ratio = (maxtab[1+i,1] - noise_amp) / theo_amp
+        print distances[i], ":", amp_ratio
+    
     plt.scatter(array(maxtab)[:,0], array(maxtab)[:,1], color='red')
     plt.plot(hilbert_amps)
     plt.plot(theo_hilbert_amps, 'r', alpha=0.3)
