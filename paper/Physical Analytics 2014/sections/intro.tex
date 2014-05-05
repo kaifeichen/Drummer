@@ -2,60 +2,71 @@
 \label{sec:intro}
 
 
-Indoor localization enables plenty of location-based applications. 
+% different indoor localization is used
+Driven by great potential of applications, indoor localization has been studied in a wide scope of aspects.
+Trilateration combined with ranging technology, such as infrared and ultrasound,
+yields fine grained geometric localization results when no obstacle is presented \fxnote{[infrared, ultrasound]}. 
+Fingerprinting localizes by comparing a signature with pre-populated database of fingerprints, such as 
+wireless signal strengths, special motion patterns, acoustic patterns, and pre-installed beacons \fxnote{[RADAR, spinloc, livesynergy]}. 
+Dead reckoning uses inertial measurement units (IMU), e.g. accelerometer, compass, and gyroscope, to estimate 
+velocity and orientation for trajectory estimation \fxnote{[Zee, Warkie markie]}. Targeted applications also vary. Accurate geometric 
+localization is used for indoor robot manipulation or automation. Symbolic localization targets applications that requires 
+location semantics, such as occupancy-driven HVAC system, energy foot print, activity recognition, etc. 
 
 
 
-% 
-People has been attempting indoor localization in a wide scope of approaches, ranging from 
-trilateration to fingerprinting to dead reckoning. Inertial measurement units (IMU), 
-mostly referring accelerometer, 
-compass, and gyroscope, have been ubiquitous with the explosion of mobile phones, and used in
-estimating in-building trajectories for localization. However, because of hardware limitation, 
-IMU in mobile phone suffer from drift and cumulative errors. 
+All these source of information are not going to work independently, and tend to be fused together with 
+appropriate statistic models to generate more reliable localization results. 
+Particle Filter and Kalman Filter can be used to calculate posterior distribution of location given 
+combined observations from ranging, fingerprinting, and dead-reckoning. Similar to outdoor location-based services, 
+a database of location semantic 
+and geometric location \fxnote{[some service discovery database project]} can be used to convert results in between.
+As an example, if activity recognition module figures out the user is using coffee machine, then the possibility 
+that she is around geometric points near coffee machine will be higher. 
+
 
 
 
 % we need semantic location
-However, the focuses of these work are not perfectly in line with requirements from location-based services (LBS). 
-Most of them are purely focusing on how to localize a geometric location, whereas 
-many indoor LBS also requires the semantic of the location rather than the location itself, such as room number,
-or a handicap door. \fxnote{say geometric is important, interaction, proximity social network} 
-One example of indoor LBS is occupancy driven HVAC (heating, ventilation, and air conditioning).
-Because HVAC control are at most room-level granularity, so estimating the number of room the 
-user is in will be more nature and helpful. For LBSs that requires geometric locations, semantic will also help
-in many cases. For instance, proximity based social network \fxnote{[cite]} need to ensure two people staying near
-to each other have no wall in between. 
+%However, the focuses of these work are not perfectly in line with requirements from location-based services (LBS). 
+%Most of them are purely focusing on how to localize a geometric location, whereas 
+%many indoor LBS also requires the semantic of the location rather than the location itself, such as room number,
+%or a handicap door. \fxnote{say geometric is important, interaction, proximity social network} 
+%One example of indoor LBS is occupancy driven HVAC (heating, ventilation, and air conditioning).
+%Because HVAC control are at most room-level granularity, so estimating the number of room the 
+%user is in will be more nature and helpful. For LBSs that requires geometric locations, semantic will also help
+%in many cases. For instance, proximity based social network \fxnote{[cite]} need to ensure two people staying near
+%to each other have no wall in between. 
 
 
 
 % \fxnote{geometric location needs calibration}
-Geometric location can be done by: trilateration or triangulation, dense site survey + fingerprinting, dead reckoning.
-First one has problems when obstacles are presented, second suffers from training overhead. 3rd works, but it needs calibration. 
-step count, particle filter, kalman filter.
+% Geometric location can be done by: trilateration or triangulation, dense site survey + fingerprinting, dead reckoning.
+% First one has problems when obstacles are presented, second suffers from training overhead. 3rd works, but it needs calibration. 
+% step count, particle filter, kalman filter.
 
 
-Location semantics can be inferred in different approaches. One way is to get geometric location with 
-adequate accuracy. By using predefined location to semantic information database \fxnote{[cite]}, we can get semantic information
-by querying geometric locations, which is also adopted by the majority of outdoor location-based services.
-However, given much richer information and faster environment change, creating and maintaining such as a
-semantic database is not feasible in most buildings. On the other hand, many semantic information requires
-find grained geometric estimation that can hardly be archived by state-of-art localization techniques. For 
-example, energy foot-printing \fxnote{[cite]} is the notion of monitoring personal energy consumption
-according to her location and 
-the electronic devices (e.g. coffee machine, refrigerator, microwave) being used at that location. The 
-distance between these devices can be sub-meter, and no current geometric localization technique can achieve this 
-accuracy in general cases. Another idea to infer semantic location is from the physical features, and it is very application
-specific. For instance, a room is usually enclosed by walls, so you should be able to encode room number in 
-special light bulbs, and give perfect room-level localization. However, some office buildings use glasses to separate
-rooms. %Also ultrasound beacon may also work, but some buildings has no door 
-For energy foot-printing, one can actually either see (by camera) or hear (by microphone) what the user is doing.
+% Location semantics can be inferred in different approaches. One way is to get geometric location with 
+% adequate accuracy. By using predefined location to semantic information database \fxnote{[cite]}, we can get semantic information
+% by querying geometric locations, which is also adopted by the majority of outdoor location-based services.
+% However, given much richer information and faster environment change, creating and maintaining such as a
+% semantic database is not feasible in most buildings. On the other hand, many semantic information requires
+% find grained geometric estimation that can hardly be archived by state-of-art localization techniques. For 
+% example, energy foot-printing \fxnote{[cite]} is the notion of monitoring personal energy consumption
+% according to her location and 
+% the electronic devices (e.g. coffee machine, refrigerator, microwave) being used at that location. The 
+% distance between these devices can be sub-meter, and no current geometric localization technique can achieve this 
+% accuracy in general cases. Another idea to infer semantic location is from the physical features, and it is very application
+% specific. For instance, a room is usually enclosed by walls, so you should be able to encode room number in 
+% special light bulbs, and give perfect room-level localization. However, some office buildings use glasses to separate
+% rooms. %Also ultrasound beacon may also work, but some buildings has no door 
+% For energy foot-printing, one can actually either see (by camera) or hear (by microphone) what the user is doing.
 
 
 
 % intro of Drummer
-In this paper, we investigate how sounds can be used to learn and probe the environemnt, to provide more information
-to localization service. We introduce {\em Drummer}, a environment probing and listening service 
+In this paper, we investigate how sounds provide more information about the location
+to feed data fusion models. We introduce {\em Drummer}, a environment probing and listening service 
 to assist both geometric calibration and semantic indoor localization inference. The basic idea is sound 
 can be used to measure distance from walls, and also learn human activities that will create featured sound.
 This solve all problems, because: it can 
